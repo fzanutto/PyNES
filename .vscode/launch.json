@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Python main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["smb.nes"]
+        }
+    ]
+}

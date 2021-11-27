@@ -13,7 +13,7 @@ class Jsr(Jmp):
     def write(cls, cpu, memory_address, value):
         cpu.increase_stack_size(2)
 
-        # store de pc reg on the stack
+        # store the pc reg on the stack
         cpu.set_memory(cpu.sp_reg, cpu.pc_reg, num_bytes=2)
 
         # jump to the memory location

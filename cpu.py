@@ -103,6 +103,9 @@ class CPU(object):
     def increase_stack_size(self, size: int):
         self.sp_reg -= size
 
+    def decrease_stack_size(self, size: int):
+        self.sp_reg += size
+
     def find_instructions(self, cls):
         """
         find all available instructions
@@ -146,13 +149,13 @@ class CPU(object):
             rng = range(0, len(inst_bytes), 2)
             inst_hexes = [inst_bytes[i:i + 2] for i in rng]
 
-            print("{}  {:<8}  {:<11}        A:{:<3} X:{:<3} Y:{:<3} P:{:<2}  SP:{}".format(
+            print("{}  {:<8}  {:<11}        A:{:<2} X:{:<2} Y:{:<2} P:{:<2}  SP:{}".format(
                 hex(self.pc_reg)[2:].upper(),
                 ' '.join(inst_hexes),
                 instruction.__name__,
-                self.a_reg,
-                self.x_reg,
-                self.y_reg,
+                hex(self.a_reg)[2:].upper(),
+                hex(self.x_reg)[2:].upper(),
+                hex(self.y_reg)[2:].upper(),
                 hex(self.status_reg.to_int())[2:].upper(),
                 hex(self.sp_reg)[2:].upper()
             ))

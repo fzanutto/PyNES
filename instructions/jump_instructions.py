@@ -1,5 +1,6 @@
-from addressing import AbsoluteAddressing, IndirectAddressing
+from addressing import AbsoluteAddressing, ImplicitAddressing, IndirectAddressing
 from instructions.base_instructions import Jmp, Jsr, BranchSet, BranchClear
+from instructions.generic_instructions import Instruction
 from status import Status
 
 
@@ -13,6 +14,20 @@ class JmpInd(IndirectAddressing, Jmp):
 
 class JsrAbs(AbsoluteAddressing, Jsr):
     identifier_byte = bytes([0x20])
+
+
+class Rts(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x60])
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+
+        value1 = cpu.get_memory(cpu.sp_reg)
+        value2 = cpu.get_memory(cpu.sp_reg + 1)
+
+        cpu.decrease_stack_size(2)
+
+        cpu.pc_reg = (value2 << 8) + value1
 
 
 # branch sets

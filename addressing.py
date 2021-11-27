@@ -86,7 +86,8 @@ class ZeroPageAddressing(Addressing):
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
-        address = int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu)
+        address = int.from_bytes(
+            data_bytes, byteorder='little') + cls.get_offset(cpu)
 
         # % 256 for overflow
         return address % 256
@@ -115,8 +116,8 @@ class RelativeAddressing(Addressing):
         # get the PC
         current_address = cpu.pc_reg
 
-        # offset by the value in instruction
-        return current_address + int.from_bytes(data_bytes, byteorder='little')
+        # offset from the following instruction
+        return current_address + 2 + int.from_bytes(data_bytes, byteorder='little')
 
 
 class IndirectBase(Addressing):
@@ -152,4 +153,3 @@ class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
     @classmethod
     def get_address(cls, cpu: 'c.CPU', data_bytes):
         return super().get_address(cpu, data_bytes) + cpu.y_reg
-

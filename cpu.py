@@ -45,7 +45,6 @@ class CPU(object):
 
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)
-        print(instructions_list)
         self.instructions = {}
         for instruction in instructions_list:
             if instruction in self.instructions:
@@ -119,7 +118,7 @@ class CPU(object):
 
         # load rom
         self.rom = rom
-        self.pc_reg = 0x8000  # first rom address
+        self.pc_reg = 0xC000  # first rom address
 
         # load the rom program instruction into memory
         self.memory_owners.append(self.rom)
@@ -135,7 +134,7 @@ class CPU(object):
             instruction: Instruction = self.instructions.get(
                 identifier_byte, None)
             if instruction is None:
-                raise Exception('pc: {} Instruction not found: {}'.format(self.pc_reg,
+                raise Exception('pc: {} Instruction not found: {}'.format(hex(self.pc_reg),
                                                                           identifier_byte.hex()))
 
             # get the data bytes
@@ -143,13 +142,14 @@ class CPU(object):
 
             # print out diagnostic information
             # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
-            print("{}, {}, {}, A:{}, X:{}, Y:{}, P:{}, SP:{}".format(hex(self.pc_reg),
-                                                                     (identifier_byte +
-                                                                      data_bytes).hex(),
-                                                                     instruction.__name__, self.a_reg, self.x_reg,
-                                                                     self.y_reg, bin(
-                                                                         self.status_reg.to_int()),
-                                                                     hex(self.sp_reg)))
+            instruction_bytes = (identifier_byte + data_bytes).hex().upper()
+            print("{}  {:<8}  {:<11}        A:{:<3}  X:{:<3}  Y:{:<3}  P:{}  SP:{}".format(hex(self.pc_reg)[2:].upper(),
+                                                                                           ' '.join([instruction_bytes[i:i + 2] for i in range(
+                                                                                               0, len(instruction_bytes), 2)]),
+                                                                                           instruction.__name__, self.a_reg, self.x_reg,
+                                                                                           self.y_reg, bin(
+                self.status_reg.to_int()),
+                hex(self.sp_reg)[2:].upper()))
 
             self.pc_reg += instruction.get_instruction_length()
 

@@ -11,7 +11,7 @@ class Instruction:
         return None
 
     @classmethod
-    def apply_side_effects(cls, cpu):
+    def apply_side_effects(cls, cpu, memory_address, value):
         pass
 
     @classmethod
@@ -30,7 +30,7 @@ class Instruction:
 
         cls.write(cpu, memory_address, value)
 
-        cls.apply_side_effects(cpu)
+        cls.apply_side_effects(cpu, memory_address, value)
 
         return value
 

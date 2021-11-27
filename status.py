@@ -24,14 +24,14 @@ class Status:
     """
 
     class StatusTypes(Enum):
-        carry = 0
-        zero = 1
-        interrupt = 2
-        decimal = 3
+        carry = 0  # C
+        zero = 1  # Z
+        interrupt = 2  # I
+        decimal = 3  # D
         unused1 = 4
         unused2 = 5
-        overflow = 6
-        negative = 7
+        overflow = 6  # V
+        negative = 7  # N
 
     def __init__(self):
         self.bits = OrderedDict([

@@ -62,7 +62,7 @@ class Ldy(Ld):
 
 
 class Sta(WritesToMem, Instruction):
-    @classmethod 
+    @classmethod
     def get_data(cls, cpu, memory_address, data_bytes: bytes):
         return cpu.a_reg
 
@@ -84,7 +84,7 @@ class SetBit(ImplicitAddressing, Instruction):
     sets a bit to be True
     """
     @classmethod
-    def apply_side_effects(cls, cpu):
+    def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[cls.bit] = True
 
 
@@ -93,7 +93,7 @@ class ClearBit(ImplicitAddressing, Instruction):
     sets a bit to be False
     """
     @classmethod
-    def apply_side_effects(cls, cpu):
+    def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[cls.bit] = False
 
 
@@ -105,7 +105,7 @@ class Transfer(ImplicitAddressing, Instruction):
     toRegister = None
 
     @classmethod
-    def apply_side_effects(cls, cpu):
+    def apply_side_effects(cls, cpu, memory_address, value):
         if cls.fromRegister is None or cls.toRegister is None:
             raise Exception('Transfer instruction register is None',
                             cls.fromRegister, cls.toRegister)

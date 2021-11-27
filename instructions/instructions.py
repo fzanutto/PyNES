@@ -1,5 +1,6 @@
 from addressing import *
 from instructions.base_instructions import SetBit, ClearBit, Nop
+from instructions.generic_instructions import Instruction
 from status import Status
 
 
@@ -43,3 +44,19 @@ class Clv(ClearBit):
 class Cli(ClearBit):
     identifier_byte = bytes([0x58])
     bit = Status.StatusTypes.interrupt
+
+
+class Bit(ZeroPageAddressing, Instruction):
+    identifier_byte = bytes([0x24])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return cpu.get_memory(memory_address)
+
+    @classmethod
+    def apply_side_effects(cls, cpu, memory_address, value):
+        and_result = cpu.a_reg & value
+
+        cpu.status_reg.bits[Status.StatusTypes.zero] = not and_result
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = value & (1 << 5) > 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = value > 127

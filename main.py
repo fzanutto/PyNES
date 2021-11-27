@@ -1,6 +1,7 @@
 import argparse
 
 from cpu import CPU
+from io_registers import IO_Registers
 from ram import RAM
 from ppu import PPU
 from rom import ROM
@@ -27,8 +28,10 @@ def main():
     # create ppu
     ppu = PPU()
 
+    io_regs = IO_Registers()
+
     # create cpu
-    cpu = CPU(ram, ppu)
+    cpu = CPU(ram, ppu, io_regs)
     cpu.start_up()
     cpu.run_rom(rom)
 

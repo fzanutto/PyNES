@@ -1,6 +1,7 @@
 from typing import List
 
 from instructions.generic_instructions import Instruction
+from io_registers import IO_Registers
 from memory_owner import MemoryOwnerMixin
 from ppu import PPU
 from ram import RAM
@@ -15,14 +16,16 @@ import instructions.transfer_instructions as t_file
 
 
 class CPU(object):
-    def __init__(self, ram: RAM, ppu: PPU):
+    def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers):
         self.ram = ram
         self.ppu = ppu
+        self.io_regs = io_regs
         self.rom = None
 
         self.memory_owners: List[MemoryOwnerMixin] = [
             self.ram,
-            self.ppu
+            self.ppu,
+            self.io_regs
         ]
 
         # status registers: store a single byte
@@ -61,7 +64,7 @@ class CPU(object):
         """
         # TODO Hex vs binary
         self.pc_reg = 0
-        self.status_reg = Status()
+        self.status_reg = Status()  # know as 'P' on NesDev Wiki
         self.sp_reg = 0xFD
 
         self.x_reg = 0
@@ -69,6 +72,9 @@ class CPU(object):
         self.a_reg = 0
 
         # TODO implement memory sets
+
+        self.set_memory(0x4015, 0, num_bytes=2)
+        self.set_memory(0x4017, 0, num_bytes=2)
 
     def get_memory(self, location: int) -> int:
         """
@@ -113,7 +119,7 @@ class CPU(object):
 
         # load rom
         self.rom = rom
-        self.pc_reg = 0xC000
+        self.pc_reg = 0x8000  # first rom address
 
         # load the rom program instruction into memory
         self.memory_owners.append(self.rom)
@@ -129,8 +135,8 @@ class CPU(object):
             instruction: Instruction = self.instructions.get(
                 identifier_byte, None)
             if instruction is None:
-                raise Exception('Instruction not found: {}'.format(
-                    identifier_byte.hex()))
+                raise Exception('pc: {} Instruction not found: {}'.format(self.pc_reg,
+                                                                          identifier_byte.hex()))
 
             # get the data bytes
             data_bytes = self.rom.get(self.pc_reg + 1, instruction.data_length)
@@ -141,7 +147,7 @@ class CPU(object):
                                                                      (identifier_byte +
                                                                       data_bytes).hex(),
                                                                      instruction.__name__, self.a_reg, self.x_reg,
-                                                                     self.y_reg, hex(
+                                                                     self.y_reg, bin(
                                                                          self.status_reg.to_int()),
                                                                      hex(self.sp_reg)))
 

@@ -142,14 +142,20 @@ class CPU(object):
 
             # print out diagnostic information
             # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
-            instruction_bytes = (identifier_byte + data_bytes).hex().upper()
-            print("{}  {:<8}  {:<11}        A:{:<3}  X:{:<3}  Y:{:<3}  P:{}  SP:{}".format(hex(self.pc_reg)[2:].upper(),
-                                                                                           ' '.join([instruction_bytes[i:i + 2] for i in range(
-                                                                                               0, len(instruction_bytes), 2)]),
-                                                                                           instruction.__name__, self.a_reg, self.x_reg,
-                                                                                           self.y_reg, bin(
-                self.status_reg.to_int()),
-                hex(self.sp_reg)[2:].upper()))
+            inst_bytes = (identifier_byte + data_bytes).hex().upper()
+            rng = range(0, len(inst_bytes), 2)
+            inst_hexes = [inst_bytes[i:i + 2] for i in rng]
+
+            print("{}  {:<8}  {:<11}        A:{:<3} X:{:<3} Y:{:<3} P:{:<2}  SP:{}".format(
+                hex(self.pc_reg)[2:].upper(),
+                ' '.join(inst_hexes),
+                instruction.__name__,
+                self.a_reg,
+                self.x_reg,
+                self.y_reg,
+                hex(self.status_reg.to_int())[2:].upper(),
+                hex(self.sp_reg)[2:].upper()
+            ))
 
             self.pc_reg += instruction.get_instruction_length()
 

@@ -13,6 +13,7 @@ import instructions.jump_instructions as j_file
 import instructions.load_instructions as l_file
 import instructions.store_instructions as s_file
 import instructions.transfer_instructions as t_file
+import instructions.arithmetic_instructions as a_file
 
 
 class CPU(object):
@@ -133,10 +134,19 @@ class CPU(object):
             identifier_byte = self.get_memory_owner(
                 self.pc_reg).get(self.pc_reg)
 
+            registers_state = [
+                hex(self.a_reg)[2:].upper(),
+                hex(self.x_reg)[2:].upper(),
+                hex(self.y_reg)[2:].upper(),
+                hex(self.status_reg.to_int())[2:].upper(),
+                hex(self.sp_reg)[2:].upper()
+            ]
+
             # turn the byte into an Instruction
             instruction: Instruction = self.instructions.get(
                 identifier_byte, None)
             if instruction is None:
+                print(registers_state)
                 raise Exception('pc: {} Instruction not found: {}'.format(hex(self.pc_reg),
                                                                           identifier_byte.hex()))
 
@@ -153,11 +163,7 @@ class CPU(object):
                 hex(self.pc_reg)[2:].upper(),
                 ' '.join(inst_hexes),
                 instruction.__name__,
-                hex(self.a_reg)[2:].upper(),
-                hex(self.x_reg)[2:].upper(),
-                hex(self.y_reg)[2:].upper(),
-                hex(self.status_reg.to_int())[2:].upper(),
-                hex(self.sp_reg)[2:].upper()
+                *registers_state
             ))
 
             self.pc_reg += instruction.get_instruction_length()

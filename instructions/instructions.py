@@ -46,7 +46,7 @@ class Cli(ClearBit):
     bit = Status.StatusTypes.interrupt
 
 
-class Bit(ZeroPageAddressing, Instruction):
+class BitZeroPage(ZeroPageAddressing, Instruction):
     identifier_byte = bytes([0x24])
 
     @classmethod
@@ -58,8 +58,10 @@ class Bit(ZeroPageAddressing, Instruction):
         and_result = cpu.a_reg & value
 
         cpu.status_reg.bits[Status.StatusTypes.zero] = not and_result
-        cpu.status_reg.bits[Status.StatusTypes.overflow] = value & (1 << 5) > 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = value > 127
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = (
+            value & (1 << 6)) > 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = (
+            value & (1 << 7)) > 0
 
 
 class Php(ImplicitAddressing, Instruction):

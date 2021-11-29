@@ -12,7 +12,7 @@ import instructions.instructions as i_file
 import instructions.jump_instructions as j_file
 import instructions.load_instructions as l_file
 import instructions.store_instructions as s_file
-import instructions.transfer_instructions as t_file
+import instructions.stack_instructions as t_file
 import instructions.arithmetic_instructions as a_file
 
 

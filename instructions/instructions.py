@@ -46,9 +46,7 @@ class Cli(ClearBit):
     bit = Status.StatusTypes.interrupt
 
 
-class BitZeroPage(ZeroPageAddressing, Instruction):
-    identifier_byte = bytes([0x24])
-
+class Bit(Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return cpu.get_memory(memory_address)
@@ -64,35 +62,9 @@ class BitZeroPage(ZeroPageAddressing, Instruction):
             value & (1 << 7)) > 0
 
 
-class Php(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x08])
-
-    @classmethod
-    def apply_side_effects(cls, cpu, memory_address, value):
-        cpu.increase_stack_size(1)
-
-        value = cpu.status_reg.to_int() | (1 << 5) | (1 << 4)
-        cpu.set_memory(cpu.sp_reg, value, num_bytes=1)
+class BitZeroPage(ZeroPageAddressing, Bit):
+    identifier_byte = bytes([0x24])
 
 
-class Pla(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x68])
-
-    sets_zero_bit = True
-    sets_negative_bit = True
-
-    @classmethod
-    def get_address(cls, cpu, data_bytes) -> Optional[int]:
-        return cpu.sp_reg
-
-    @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.a_reg = value
-
-    @classmethod
-    def apply_side_effects(cls, cpu, memory_address, value):
-        cpu.decrease_stack_size(1)
+class BitAbsolute(AbsoluteAddressing, Bit):
+    identifier_byte = bytes([0x2C])

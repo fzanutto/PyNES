@@ -54,8 +54,12 @@ class Status:
         if instruction.sets_negative_bit:
             self.bits[Status.StatusTypes.negative] = value > 127
 
-    def to_int(self):
+    def to_int(self) -> int:
         value = 0
         for i, bit in enumerate(self.bits.values()):
             value += int(bit) * (2 ** i)
         return value
+
+    def from_int(self, value: int):
+        for i in self.bits:
+            self.bits[i] = (value & (1 << i.value)) > 0

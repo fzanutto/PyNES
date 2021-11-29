@@ -42,13 +42,10 @@ class Pha(ImplicitAddressing, PushToStack):
 
 
 class PullFromStack(Instruction):
-    @classmethod
-    def get_address(cls, cpu, data_bytes) -> Optional[int]:
-        return cpu.sp_reg
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.get_memory(cpu.sp_reg)
 
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):

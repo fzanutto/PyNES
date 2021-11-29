@@ -36,6 +36,32 @@ class CmpImm(ImmediateReadAddressing, Cmp):
     identifier_byte = bytes([0xC9])
 
 
+class Cpy(Instruction):
+    @classmethod
+    def apply_side_effects(cls, cpu, memory_address, value):
+        diff = cpu.y_reg - value
+        cpu.status_reg.bits[Status.StatusTypes.carry] = diff >= 0
+        cpu.status_reg.bits[Status.StatusTypes.zero] = diff == 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = diff & (1 << 7)
+
+
+class CpyImm(ImmediateReadAddressing, Cpy):
+    identifier_byte = bytes([0xC0])
+
+
+class Cpx(Instruction):
+    @classmethod
+    def apply_side_effects(cls, cpu, memory_address, value):
+        diff = cpu.x_reg - value
+        cpu.status_reg.bits[Status.StatusTypes.carry] = diff >= 0
+        cpu.status_reg.bits[Status.StatusTypes.zero] = diff == 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = diff & (1 << 7)
+
+
+class CpxImm(ImmediateReadAddressing, Cpx):
+    identifier_byte = bytes([0xE0])
+
+
 class Or(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True

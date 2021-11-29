@@ -64,8 +64,15 @@ class Pla(ImplicitAddressing, PullFromStack):
 
 
 class Plp(ImplicitAddressing, PullFromStack):
+    '''
+    Pulls value from stack pointer and sets status register
+    This instruction does not change the value of bits 4 and 5 of the status register
+    '''
     identifier_byte = bytes([0x28])
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.status_reg.from_int(value)
+        current_value = cpu.status_reg.to_int()
+        bits_4_5 = current_value & ((1 << 5) | (1 << 4))
+        remove_bits_4_5 = (~((1 << 5) | (1 << 4))) & 255
+        cpu.status_reg.from_int((value & remove_bits_4_5) | bits_4_5)

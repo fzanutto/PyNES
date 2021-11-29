@@ -1,3 +1,4 @@
+from typing import Optional
 from addressing import ImplicitAddressing, RelativeAddressing
 from instructions.generic_instructions import Instruction, WritesToMem
 
@@ -41,6 +42,10 @@ class Nop(Instruction):
 class Ld(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
+    
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return cpu.get_memory(memory_address)
 
 
 class Lda(Ld):
@@ -95,21 +100,3 @@ class ClearBit(ImplicitAddressing, Instruction):
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[cls.bit] = False
-
-
-class Transfer(ImplicitAddressing, Instruction):
-    """
-    transfer value from a register to another
-    """
-    fromRegister = None
-    toRegister = None
-
-    @classmethod
-    def apply_side_effects(cls, cpu, memory_address, value):
-        if cls.fromRegister is None or cls.toRegister is None:
-            raise Exception('Transfer instruction register is None',
-                            cls.fromRegister, cls.toRegister)
-
-        if cls.fromRegister == "X":
-            if cls.toRegister == "S":
-                cpu.sp_reg = cpu.x_reg

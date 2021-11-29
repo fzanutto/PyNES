@@ -92,6 +92,42 @@ class XorImm(ImmediateReadAddressing, Xor):
         return cpu.a_reg ^ super().get_data(cpu, memory_address, data_bytes)
 
 
+class SubCarry(Instruction):
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = value
+
+class SubCarryImm(ImmediateReadAddressing, SubCarry):
+    identifier_byte = bytes([0xE9])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes):
+        value = super().get_data(cpu, memory_address, data_bytes)
+        value = (~value) & 255
+
+        is_first_number_positive = cpu.a_reg < 128
+        is_second_number_positive = value < 128
+
+        sum = cpu.a_reg + value + \
+            int(cpu.status_reg.bits[Status.StatusTypes.carry])
+
+        cpu.status_reg.bits[Status.StatusTypes.carry] = sum > 255
+
+        sum = sum % 256
+
+        is_sum_positive = sum < 128
+
+        if is_first_number_positive == is_second_number_positive:
+            cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive != is_sum_positive
+        else:
+            cpu.status_reg.bits[Status.StatusTypes.overflow] = False
+
+        return sum
+
+
 class AddCarry(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True

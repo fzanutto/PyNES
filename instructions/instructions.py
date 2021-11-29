@@ -71,7 +71,8 @@ class Php(ImplicitAddressing, Instruction):
     def apply_side_effects(cls, cpu, memory_address, value):
         cpu.increase_stack_size(1)
 
-        cpu.set_memory(cpu.sp_reg, cpu.status_reg.to_int(), num_bytes=1)
+        value = cpu.status_reg.to_int() | (1 << 5) | (1 << 4)
+        cpu.set_memory(cpu.sp_reg, value, num_bytes=1)
 
 
 class Pla(ImplicitAddressing, Instruction):

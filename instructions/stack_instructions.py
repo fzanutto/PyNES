@@ -18,6 +18,8 @@ class Tax(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.x_reg = value
+
+
 class Tay(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0xA8])
 
@@ -32,6 +34,7 @@ class Tay(ImplicitAddressing, Instruction):
     def write(cls, cpu, memory_address, value):
         cpu.y_reg = value
 
+
 class Tsx(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0xBA])
 
@@ -45,6 +48,8 @@ class Tsx(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.x_reg = value
+
+
 class Txa(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x8A])
 
@@ -59,8 +64,10 @@ class Txa(ImplicitAddressing, Instruction):
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
+
 class Txs(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x9A])
+
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return cpu.x_reg
@@ -68,6 +75,7 @@ class Txs(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.sp_reg = value
+
 
 class Tya(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x98])
@@ -87,8 +95,7 @@ class Tya(ImplicitAddressing, Instruction):
 class PushToStack(Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(0x0100 + cpu.sp_reg, value, num_bytes=1)
-        cpu.increase_stack_size(1)
+        cpu.push_to_stack(value, 1)
 
 
 class Php(ImplicitAddressing, PushToStack):
@@ -111,8 +118,7 @@ class PullFromStack(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        cpu.decrease_stack_size(1)
-        return cpu.get_memory(0x0100 + cpu.sp_reg)
+        return cpu.pull_from_stack(1)
 
 
 class Pla(ImplicitAddressing, PullFromStack):

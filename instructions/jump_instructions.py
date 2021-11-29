@@ -21,13 +21,7 @@ class Rts(ImplicitAddressing, Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-
-        value1 = cpu.get_memory(cpu.sp_reg)
-        value2 = cpu.get_memory(cpu.sp_reg + 1)
-
-        cpu.decrease_stack_size(2)
-
-        cpu.pc_reg = (value2 << 8) + value1
+        cpu.pc_reg = cpu.pull_from_stack(2)
 
 
 # branch sets

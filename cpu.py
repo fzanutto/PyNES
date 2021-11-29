@@ -101,11 +101,21 @@ class CPU(object):
         memory_owner = self.get_memory_owner(location)
         memory_owner.set(location, value, num_bytes)
 
-    def increase_stack_size(self, size: int):
-        self.sp_reg -= size
+    def push_to_stack(self, value, size):
 
-    def decrease_stack_size(self, size: int):
-        self.sp_reg += size
+        for i in range(size):
+            self.set_memory(0x0100 + self.sp_reg,
+                            (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
+            self.sp_reg -= 1
+
+    def pull_from_stack(self, size):
+        value = 0
+
+        for i in range(size):
+            self.sp_reg += 1
+            value += self.get_memory(0x0100 + self.sp_reg) << (8 * i)
+
+        return value
 
     def find_instructions(self, cls):
         """
@@ -129,7 +139,9 @@ class CPU(object):
 
         # run program
         self.running = True
+        i = 0
         while self.running:
+            i += 1
             # get the current byte at pc
             identifier_byte = self.get_memory_owner(
                 self.pc_reg).get(self.pc_reg)
@@ -159,7 +171,8 @@ class CPU(object):
             rng = range(0, len(inst_bytes), 2)
             inst_hexes = [inst_bytes[i:i + 2] for i in rng]
 
-            print("{}  {:<8}  {:<11}        A:{:<2} X:{:<2} Y:{:<2} P:{:<2}  SP:{}".format(
+            print("{} {}  {:<8}  {:<11}        A:{:<2} X:{:<2} Y:{:<2} P:{:<2}  SP:{}".format(
+                i,
                 hex(self.pc_reg)[2:].upper(),
                 ' '.join(inst_hexes),
                 instruction.__name__,

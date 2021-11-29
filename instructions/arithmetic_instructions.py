@@ -1,7 +1,7 @@
 
 
 from typing import Optional
-from addressing import AbsoluteAddressing, ImmediateReadAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
+from addressing import AbsoluteAddressing, ImmediateReadAddressing, ImplicitAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction
 from status import Status
 
@@ -161,3 +161,60 @@ class AddCarryImm(ImmediateReadAddressing, AddCarry):
             cpu.status_reg.bits[Status.StatusTypes.overflow] = False
 
         return sum
+
+
+class Iny(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0xC8])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return (cpu.y_reg + 1) % 256
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.y_reg = value
+
+class Dey(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x88])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return cpu.y_reg - 1 if cpu.y_reg > 0 else 255
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.y_reg = value
+
+class Inx(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0xE8])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return (cpu.x_reg + 1) % 256
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.x_reg = value
+
+class Dex(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0xCA])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return cpu.x_reg - 1 if cpu.x_reg > 0 else 255
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.x_reg = value

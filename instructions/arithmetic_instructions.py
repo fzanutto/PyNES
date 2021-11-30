@@ -1,5 +1,3 @@
-
-
 from typing import Optional
 from addressing import AbsoluteAddressing, ImmediateReadAddressing, ImplicitAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction
@@ -218,3 +216,86 @@ class Dex(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.x_reg = value
+
+
+class Lsr(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x4A])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
+
+        value = value >> 1
+
+        return value
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = value
+
+class Asl(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x0A])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
+
+        value = (value << 1) & 255
+
+        return value
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = value
+
+class Ror(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x6A])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+        current_carry = cpu.status_reg.bits[Status.StatusTypes.carry]
+
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
+
+        value = (value >> 1) | (current_carry << 7)
+
+        return value
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = value
+
+class Rol(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x2A])
+
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+        current_carry = cpu.status_reg.bits[Status.StatusTypes.carry]
+
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 1
+
+        value = ((value << 1) | current_carry) & 255
+
+        return value
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.a_reg = value

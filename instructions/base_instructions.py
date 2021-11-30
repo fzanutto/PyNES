@@ -12,7 +12,7 @@ class Jmp(Instruction):
 class Jsr(Jmp):
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.push_to_stack(cpu.pc_reg, 2)
+        cpu.push_to_stack(cpu.pc_reg - 1, 2)
 
         # jump to the memory location
         super().write(cpu, memory_address, value)

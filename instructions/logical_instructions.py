@@ -83,6 +83,14 @@ class CpyImm(ImmediateReadAddressing, Cpy):
     identifier_byte = bytes([0xC0])
 
 
+class CpyZeroPage(ZeroPageAddressing, Cpy):
+    identifier_byte = bytes([0xC4])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return cpu.get_memory(memory_address)
+
+
 class Cpx(Instruction):
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
@@ -135,25 +143,41 @@ class XorImm(ImmediateReadAddressing, Xor):
         return cpu.a_reg ^ super().get_data(cpu, memory_address, data_bytes)
 
 
-class Lsr(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x4A])
-
+class Lsr(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.a_reg
+    def write(cls, cpu, memory_address, value):
+        cpu.set_memory(memory_address, value, num_bytes=1)
 
+    def lsr(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
 
         value = value >> 1
 
         return value
 
+
+class LsrImpl(ImplicitAddressing, Lsr):
+    identifier_byte = bytes([0x4A])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return super().lsr(cpu, cpu.a_reg)
+
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
+
+
+class LsrZeroPage(ZeroPageAddressing, Lsr):
+    identifier_byte = bytes([0x46])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.get_memory(memory_address)
+        return super().lsr(cpu, value)
 
 
 class Asl(ImplicitAddressing, Instruction):

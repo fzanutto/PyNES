@@ -152,4 +152,5 @@ class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
     """
     @classmethod
     def get_address(cls, cpu: 'c.CPU', data_bytes):
-        return super().get_address(cpu, data_bytes) + cpu.y_reg
+        value = super().get_address(cpu, data_bytes) + cpu.y_reg 
+        return value & 0xFFFF

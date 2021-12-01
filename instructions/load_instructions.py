@@ -47,7 +47,7 @@ class LdaAbs(AbsoluteAddressing, Lda):
         return cpu.get_memory(memory_address)
 
 
-class LdaIndirectIndexed(IndirectIndexedAddressing, Lda):
+class LdaIndIdx(IndirectIndexedAddressing, Lda):
     identifier_byte = bytes([0xB1])
 
 

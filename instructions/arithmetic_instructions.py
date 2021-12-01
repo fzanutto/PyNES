@@ -183,3 +183,38 @@ class Dex(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.x_reg = value
+
+
+class Inc(Instruction):
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return (cpu.get_memory(memory_address) + 1) % 256
+    
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.set_memory(memory_address, value, num_bytes = 1)
+
+
+class IncZeroPage(ZeroPageAddressing, Inc):
+    identifier_byte = bytes([0xE6])
+
+
+class Dec(Instruction):
+    sets_zero_bit = True
+    sets_negative_bit = True
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.get_memory(memory_address)
+        return value - 1 if value > 0 else 255
+    
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.set_memory(memory_address, value, num_bytes = 1)
+
+class DecZeroPage(ZeroPageAddressing, Dec):
+    identifier_byte = bytes([0xC6])
+    

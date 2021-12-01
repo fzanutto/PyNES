@@ -180,36 +180,51 @@ class LsrZeroPage(ZeroPageAddressing, Lsr):
         return super().lsr(cpu, value)
 
 
-class Asl(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x0A])
-
+class Asl(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
+
+    def asl(cpu, value):
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
+        value = (value << 1) & 255
+        return value
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.get_memory(memory_address)
+        return cls.asl(cpu, value)
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        return cpu.set_memory(memory_address, value, num_bytes=1)
+
+class AslImpl(ImplicitAddressing, Asl):
+    identifier_byte = bytes([0x0A])
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         value = cpu.a_reg
-
-        cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
-
-        value = (value << 1) & 255
-
-        return value
+        return super().asl(cpu, value)
 
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
+class AslZeroPage(ZeroPageAddressing, Asl):
+    identifier_byte = bytes([0x06])
 
-class Ror(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x6A])
 
+class Ror(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.a_reg
+        value = cpu.get_memory(memory_address)
+        
+        return cls.ror(cpu, value)
+
+    def ror(cpu, value):
         current_carry = cpu.status_reg.bits[Status.StatusTypes.carry]
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
@@ -220,18 +235,35 @@ class Ror(ImplicitAddressing, Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
+        cpu.set_memory(memory_address, value, num_bytes = 1)
+
+class RorImpl(ImplicitAddressing, Ror):
+    identifier_byte = bytes([0x6A])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+        return super().ror(cpu, value)
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
+class RorZeroPage(ZeroPageAddressing, Ror):
+    identifier_byte = bytes([0x66])
 
-class Rol(ImplicitAddressing, Instruction):
-    identifier_byte = bytes([0x2A])
 
+class Rol(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.a_reg
+        value = cpu.get_memory(memory_address)
+        
+        return cls.rol(cpu, value)
+    
+    def rol(cpu, value):
         current_carry = cpu.status_reg.bits[Status.StatusTypes.carry]
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 1
@@ -242,7 +274,23 @@ class Rol(ImplicitAddressing, Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
+        cpu.set_memory(memory_address, value, num_bytes = 1)
+
+class RolImp(ImplicitAddressing, Rol):
+    identifier_byte = bytes([0x2A])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        value = cpu.a_reg
+        
+        return cls.rol(cpu, value)
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
+
+class RolZeroPage(ZeroPageAddressing, Rol):
+    identifier_byte = bytes([0x26])
 
 
 class Ora(Instruction):

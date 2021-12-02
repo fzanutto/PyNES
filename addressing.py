@@ -131,12 +131,24 @@ class IndirectBase(Addressing):
         return msb * 256 + lsb
 
 
-class IndirectAddressing(IndirectBase, AbsoluteAddressing):
+class IndirectAddressing(AbsoluteAddressing):
     """
     indirect address
     """
 
-# TODO: bug with get_offset being reused
+    @classmethod
+    def get_address(cls, cpu: 'c.CPU', data_bytes):
+        original_location = super().get_address(cpu, data_bytes)
+
+        lsb = cpu.get_memory(original_location)
+
+        if original_location & 0xFF == 0xFF:
+            original_location = (original_location >> 8) << 8
+            original_location -= 1
+
+        msb = cpu.get_memory(original_location + 1)
+
+        return msb * 256 + lsb
 
 
 class IndexedIndirectAddressing(IndirectBase, ZeroPageAddressingWithX):

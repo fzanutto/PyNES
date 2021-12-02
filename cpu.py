@@ -159,9 +159,9 @@ class CPU(object):
             instruction: Instruction = self.instructions.get(
                 identifier_byte, None)
             if instruction is None:
-                print(registers_state)
+                print(registers_state, hex(self.pc_reg), identifier_byte)
                 raise Exception('pc: {} Instruction not found: {}'.format(hex(self.pc_reg),
-                                                                          identifier_byte.hex()))
+                                                                          hex(identifier_byte)))
 
             # get the data bytes
             data_bytes = self.rom.get(self.pc_reg + 1, instruction.data_length)

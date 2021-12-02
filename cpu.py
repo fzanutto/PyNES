@@ -16,7 +16,7 @@ import instructions.stack_instructions as t_file
 import instructions.arithmetic_instructions as a_file
 import instructions.logical_instructions as log_file
 import instructions.nop_instructions as n_file
-
+import instructions.unofficial_instructions as u_file
 
 class CPU(object):
     def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers):

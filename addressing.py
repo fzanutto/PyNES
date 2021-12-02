@@ -117,7 +117,12 @@ class RelativeAddressing(Addressing):
         current_address = cpu.pc_reg
 
         # offset from the following instruction
-        return current_address + int.from_bytes(data_bytes, byteorder='little')
+        offset = int.from_bytes(data_bytes, byteorder='little')
+
+        if offset > 127:
+            offset = offset - 256
+
+        return current_address + offset
 
 
 class IndirectBase(Addressing):

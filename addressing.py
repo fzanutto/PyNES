@@ -123,11 +123,10 @@ class RelativeAddressing(Addressing):
 class IndirectBase(Addressing):
     @classmethod
     def get_address(cls, cpu: 'c.CPU', data_bytes):
-        # look up the bytes at [base_address, base_address + 1]
         original_location = super().get_address(cpu, data_bytes)
 
         lsb = cpu.get_memory(original_location)
-        msb = cpu.get_memory(original_location + 1)
+        msb = cpu.get_memory((original_location + 1) % 256)
 
         return msb * 256 + lsb
 
@@ -152,5 +151,5 @@ class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
     """
     @classmethod
     def get_address(cls, cpu: 'c.CPU', data_bytes):
-        value = super().get_address(cpu, data_bytes) + cpu.y_reg 
+        value = super().get_address(cpu, data_bytes) + cpu.y_reg
         return value & 0xFFFF

@@ -55,8 +55,13 @@ class SbcIdxInd(IndexedIndirectAddressing, Sbc):
     identifier_byte = bytes([0xE1])
 
 
+class SbcIndIdx(IndirectIndexedAddressing, Sbc):
+    identifier_byte = bytes([0xF1])
+
+
 class SbcZeroPage(ZeroPageAddressing, Sbc):
     identifier_byte = bytes([0xE5])
+
 
 class SbcAbs(AbsoluteAddressing, Sbc):
     identifier_byte = bytes([0xED])
@@ -111,12 +116,16 @@ class AdcIdxInd(IndexedIndirectAddressing, Adc):
     identifier_byte = bytes([0x61])
 
 
+class AdcIndIdx(IndirectIndexedAddressing, Adc):
+    identifier_byte = bytes([0x71])
+
+
 class AdcZeroPage(ZeroPageAddressing, Adc):
     identifier_byte = bytes([0x65])
-    
+
+
 class AdcAbs(AbsoluteAddressing, Adc):
     identifier_byte = bytes([0x6D])
-
 
 
 class Iny(ImplicitAddressing, Instruction):
@@ -186,10 +195,10 @@ class Inc(Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return (cpu.get_memory(memory_address) + 1) % 256
-    
+
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes = 1)
+        cpu.set_memory(memory_address, value, num_bytes=1)
 
 
 class IncZeroPage(ZeroPageAddressing, Inc):
@@ -208,13 +217,15 @@ class Dec(Instruction):
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         value = cpu.get_memory(memory_address)
         return value - 1 if value > 0 else 255
-    
+
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes = 1)
+        cpu.set_memory(memory_address, value, num_bytes=1)
+
 
 class DecZeroPage(ZeroPageAddressing, Dec):
     identifier_byte = bytes([0xC6])
-    
+
+
 class DecAbs(AbsoluteAddressing, Dec):
     identifier_byte = bytes([0xCE])

@@ -1,5 +1,5 @@
 from typing import Optional
-from addressing import AbsoluteAddressing, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing
+from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing
 from instructions.generic_instructions import Instruction
 from status import Status
 
@@ -42,6 +42,9 @@ class AndZeroPage(ZeroPageAddressing, And):
 class AndAbs(AbsoluteAddressing, And):
     identifier_byte = bytes([0x2D])
 
+class AndAbsX(AbsoluteAddressingWithY, And):
+    identifier_byte = bytes([0x39])
+
 
 class Cmp(Instruction):
     @classmethod
@@ -75,6 +78,8 @@ class CmpZeroPage(ZeroPageAddressing, Cmp):
 class CmpAbs(AbsoluteAddressing, Cmp):
     identifier_byte = bytes([0xCD])
 
+class CmpAbsY(AbsoluteAddressingWithY, Cmp):
+    identifier_byte = bytes([0xD9])
 
 class Cpy(Instruction):
     @classmethod
@@ -125,36 +130,6 @@ class CpxZeroPage(ZeroPageAddressing, Cpx):
 
 class CpxAbs(AbsoluteAddressing, Cpx):
     identifier_byte = bytes([0XEC])
-
-
-class Or(Instruction):
-    sets_zero_bit = True
-    sets_negative_bit = True
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.a_reg = cpu.a_reg | value
-
-
-class OrImm(ImmediateReadAddressing, Or):
-    identifier_byte = bytes([0x09])
-
-
-class Xor(Instruction):
-    sets_zero_bit = True
-    sets_negative_bit = True
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.a_reg = value
-
-
-class XorImm(ImmediateReadAddressing, Xor):
-    identifier_byte = bytes([0x49])
-
-    @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes):
-        return cpu.a_reg ^ super().get_data(cpu, memory_address, data_bytes)
 
 
 class Lsr(Instruction):
@@ -369,6 +344,9 @@ class OraZeroPage(ZeroPageAddressing, Ora):
 class OraIndIdx(IndirectIndexedAddressing, Ora):
     identifier_byte = bytes([0x11])
 
+class OraAbsY(AbsoluteAddressingWithY, Ora):
+    identifier_byte = bytes([0x19])
+
 class Eor(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
@@ -404,3 +382,6 @@ class EorZeroPage(ZeroPageAddressing, Eor):
 
 class EorAbsolute(AbsoluteAddressing, Eor):
     identifier_byte = bytes([0x4D])
+
+class EorAbsoluteY(AbsoluteAddressingWithY, Eor):
+    identifier_byte = bytes([0x59])

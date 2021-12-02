@@ -1,5 +1,5 @@
 from typing import Optional
-from addressing import AbsoluteAddressing, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
+from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction
 from status import Status
 
@@ -65,7 +65,11 @@ class SbcZeroPage(ZeroPageAddressing, Sbc):
 
 class SbcAbs(AbsoluteAddressing, Sbc):
     identifier_byte = bytes([0xED])
+class SbcAbsY(AbsoluteAddressingWithY, Sbc):
+    identifier_byte = bytes([0xF9])
 
+class SbcAbsX(AbsoluteAddressingWithX, Sbc):
+    identifier_byte = bytes([0xFD])
 
 class Adc(Instruction):
     sets_zero_bit = True
@@ -126,6 +130,9 @@ class AdcZeroPage(ZeroPageAddressing, Adc):
 
 class AdcAbs(AbsoluteAddressing, Adc):
     identifier_byte = bytes([0x6D])
+
+class AdcAbsY(AbsoluteAddressingWithY, Adc):
+    identifier_byte = bytes([0x79])
 
 
 class Iny(ImplicitAddressing, Instruction):

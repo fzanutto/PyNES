@@ -49,8 +49,8 @@ class CPU(object):
         instructions_list = self.find_instructions(Instruction)
         self.instructions = {}
         for instruction in instructions_list:
-            if instruction in self.instructions:
-                raise Exception('Duplicate instruction identifier bytes')
+            if instruction.identifier_byte in self.instructions.keys():
+                raise Exception('Duplicate instruction identifier bytes ' + instruction.identifier_byte.hex())
             self.instructions[instruction.identifier_byte] = instruction
 
     def start_up(self):

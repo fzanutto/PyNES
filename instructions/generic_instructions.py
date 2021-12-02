@@ -2,7 +2,7 @@ from typing import Optional
 
 
 class Instruction:
-    identifier_byte = None
+    identifier_byte: bytes = None
     sets_zero_bit = False
     sets_negative_bit = False
 

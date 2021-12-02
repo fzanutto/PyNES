@@ -1,5 +1,5 @@
 from typing import Optional
-from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing
+from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction
 from status import Status
 
@@ -38,6 +38,9 @@ class AndIndIdx(IndirectIndexedAddressing, And):
 class AndZeroPage(ZeroPageAddressing, And):
     identifier_byte = bytes([0x25])
 
+class AndZeroPageX(ZeroPageAddressingWithX, And):
+    identifier_byte = bytes([0x35])
+
 
 class AndAbs(AbsoluteAddressing, And):
     identifier_byte = bytes([0x2D])
@@ -62,6 +65,23 @@ class Cmp(Instruction):
 class CmpImm(ImmediateReadAddressing, Cmp):
     identifier_byte = bytes([0xC9])
 
+class CmpZeroPage(ZeroPageAddressing, Cmp):
+    identifier_byte = bytes([0xC5])
+
+
+class CmpZeroPageX(ZeroPageAddressingWithX, Cmp):
+    identifier_byte = bytes([0xD5])
+
+class CmpAbs(AbsoluteAddressing, Cmp):
+    identifier_byte = bytes([0xCD])
+
+class CmpAbsX(AbsoluteAddressingWithX, Cmp):
+    identifier_byte = bytes([0xDD])
+
+
+class CmpAbsY(AbsoluteAddressingWithY, Cmp):
+    identifier_byte = bytes([0xD9])
+
 
 class CmpIdxInd(IndexedIndirectAddressing, Cmp):
     identifier_byte = bytes([0xC1])
@@ -70,16 +90,6 @@ class CmpIdxInd(IndexedIndirectAddressing, Cmp):
 class CmpIndIdx(IndirectIndexedAddressing, Cmp):
     identifier_byte = bytes([0xD1])
 
-
-class CmpZeroPage(ZeroPageAddressing, Cmp):
-    identifier_byte = bytes([0xC5])
-
-
-class CmpAbs(AbsoluteAddressing, Cmp):
-    identifier_byte = bytes([0xCD])
-
-class CmpAbsY(AbsoluteAddressingWithY, Cmp):
-    identifier_byte = bytes([0xD9])
 
 class Cpy(Instruction):
     @classmethod
@@ -168,10 +178,14 @@ class LsrImpl(ImplicitAddressing, Lsr):
 class LsrZeroPage(ZeroPageAddressing, Lsr):
     identifier_byte = bytes([0x46])
 
+class LsrZeroPageX(ZeroPageAddressingWithX, Lsr):
+    identifier_byte = bytes([0x56])
 
 class LsrAbs(AbsoluteAddressing, Lsr):
     identifier_byte = bytes([0x4E])
 
+class LsrAbsX(AbsoluteAddressingWithX, Lsr):
+    identifier_byte = bytes([0x5E])
 
 class Asl(Instruction):
     sets_zero_bit = True
@@ -209,9 +223,15 @@ class AslZeroPage(ZeroPageAddressing, Asl):
     identifier_byte = bytes([0x06])
 
 
+class AslZeroPageX(ZeroPageAddressingWithX, Asl):
+    identifier_byte = bytes([0x16])
+
 class AslAbs(AbsoluteAddressing, Asl):
     identifier_byte = bytes([0x0E])
 
+
+class AslAbsX(AbsoluteAddressingWithX, Asl):
+    identifier_byte = bytes([0x1E])
 
 class Ror(Instruction):
     sets_zero_bit = True
@@ -253,10 +273,15 @@ class RorImpl(ImplicitAddressing, Ror):
 class RorZeroPage(ZeroPageAddressing, Ror):
     identifier_byte = bytes([0x66])
 
+class RorZeroPageX(ZeroPageAddressingWithX, Ror):
+    identifier_byte = bytes([0x76])
 
 class RorAbs(AbsoluteAddressing, Ror):
     identifier_byte = bytes([0x6E])
 
+
+class RorAbsX(AbsoluteAddressing, Ror):
+    identifier_byte = bytes([0x7E])
 
 class Rol(Instruction):
     sets_zero_bit = True
@@ -300,9 +325,14 @@ class RolZeroPage(ZeroPageAddressing, Rol):
     identifier_byte = bytes([0x26])
 
 
+class RolZeroPageX(ZeroPageAddressingWithX, Rol):
+    identifier_byte = bytes([0x36])
+
 class RolAbs(AbsoluteAddressing, Rol):
     identifier_byte = bytes([0x2E])
 
+class RolAbsX(AbsoluteAddressingWithX, Rol):
+    identifier_byte = bytes([0x3E])
 
 class Ora(Instruction):
     sets_zero_bit = True
@@ -340,7 +370,8 @@ class OraIdxInd(IndexedIndirectAddressing, Ora):
 class OraZeroPage(ZeroPageAddressing, Ora):
     identifier_byte = bytes([0x05])
 
-
+class OraZeroPageX(ZeroPageAddressingWithX, Ora):
+    identifier_byte = bytes([0x15])
 class OraIndIdx(IndirectIndexedAddressing, Ora):
     identifier_byte = bytes([0x11])
 
@@ -379,6 +410,9 @@ class EorIndIdx(IndirectIndexedAddressing, Eor):
 class EorZeroPage(ZeroPageAddressing, Eor):
     identifier_byte = bytes([0x45])
 
+
+class EorZeroPageX(ZeroPageAddressingWithX, Eor):
+    identifier_byte = bytes([0x55])
 
 class EorAbsolute(AbsoluteAddressing, Eor):
     identifier_byte = bytes([0x4D])

@@ -51,17 +51,12 @@ class SbcImm(ImmediateReadAddressing, Sbc):
         return super().sub_carry(cpu, memory_address, data_bytes, value)
 
 
-class SbcIdxInd(IndexedIndirectAddressing, Sbc):
-    identifier_byte = bytes([0xE1])
-
-
-class SbcIndIdx(IndirectIndexedAddressing, Sbc):
-    identifier_byte = bytes([0xF1])
-
 
 class SbcZeroPage(ZeroPageAddressing, Sbc):
     identifier_byte = bytes([0xE5])
 
+class SbcZeroPageX(ZeroPageAddressingWithX, Sbc):
+    identifier_byte = bytes([0xF5])
 
 class SbcAbs(AbsoluteAddressing, Sbc):
     identifier_byte = bytes([0xED])
@@ -70,6 +65,14 @@ class SbcAbsY(AbsoluteAddressingWithY, Sbc):
 
 class SbcAbsX(AbsoluteAddressingWithX, Sbc):
     identifier_byte = bytes([0xFD])
+
+class SbcIdxInd(IndexedIndirectAddressing, Sbc):
+    identifier_byte = bytes([0xE1])
+
+class SbcIndIdx(IndirectIndexedAddressing, Sbc):
+    identifier_byte = bytes([0xF1])
+
+
 
 class Adc(Instruction):
     sets_zero_bit = True
@@ -126,6 +129,9 @@ class AdcIndIdx(IndirectIndexedAddressing, Adc):
 
 class AdcZeroPage(ZeroPageAddressing, Adc):
     identifier_byte = bytes([0x65])
+
+class AdcZeroPageX(ZeroPageAddressingWithX, Adc):
+    identifier_byte = bytes([0x75])
 
 
 class AdcAbs(AbsoluteAddressing, Adc):
@@ -211,10 +217,14 @@ class Inc(Instruction):
 class IncZeroPage(ZeroPageAddressing, Inc):
     identifier_byte = bytes([0xE6])
 
+class IncZeroPageX(ZeroPageAddressingWithX, Inc):
+    identifier_byte = bytes([0xF6])
 
 class IncAbs(AbsoluteAddressing, Inc):
     identifier_byte = bytes([0xEE])
 
+class IncAbsX(AbsoluteAddressingWithX, Inc):
+    identifier_byte = bytes([0xFE])
 
 class Dec(Instruction):
     sets_zero_bit = True
@@ -233,6 +243,11 @@ class Dec(Instruction):
 class DecZeroPage(ZeroPageAddressing, Dec):
     identifier_byte = bytes([0xC6])
 
+class DecZeroPageX(ZeroPageAddressingWithX, Dec):
+    identifier_byte = bytes([0xD6])
 
 class DecAbs(AbsoluteAddressing, Dec):
     identifier_byte = bytes([0xCE])
+
+class DecAbsX(AbsoluteAddressingWithX, Dec):
+    identifier_byte = bytes([0xDE])

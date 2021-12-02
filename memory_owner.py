@@ -30,6 +30,10 @@ class MemoryOwnerMixin(ABC):
         """
         return self.get_memory()[position - self.memory_start_location]
 
+    def get_bytes(self, position: int, size: int = 1):
+        initial_position = position - self.memory_start_location
+        return bytes(self.get_memory()[initial_position: initial_position + size])
+
     def set(self, position: int, value: int, size: int = 1):
         """
         sets int at given position

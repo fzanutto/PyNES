@@ -147,6 +147,9 @@ class CPU(object):
             identifier_byte = self.get_memory_owner(
                 self.pc_reg).get(self.pc_reg)
 
+            if type(identifier_byte) == int:
+                identifier_byte = bytes([identifier_byte])
+
             registers_state = [
                 hex(self.a_reg)[2:].upper(),
                 hex(self.x_reg)[2:].upper(),
@@ -161,10 +164,10 @@ class CPU(object):
             if instruction is None:
                 print(registers_state, hex(self.pc_reg), identifier_byte)
                 raise Exception('pc: {} Instruction not found: {}'.format(hex(self.pc_reg),
-                                                                          hex(identifier_byte)))
+                                                                          identifier_byte))
 
             # get the data bytes
-            data_bytes = self.rom.get(self.pc_reg + 1, instruction.data_length)
+            data_bytes = self.get_memory_owner(self.pc_reg + 1).get_bytes(self.pc_reg + 1, instruction.data_length)
 
             # print out diagnostic information
             # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0

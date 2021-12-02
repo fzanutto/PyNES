@@ -39,5 +39,12 @@ class ROM(MemoryOwnerMixin):
         initial_position = position - self.memory_start_location
         return self.get_memory()[initial_position: initial_position + size]
 
+    def get_bytes(self, position: int, size: int = 1):
+        while position >= 0xC000:
+            position -= 0x4000
+
+        initial_position = position - self.memory_start_location
+        return bytes(self.get_memory()[initial_position: initial_position + size])
+
     def set(self, position: int, value: int):
         raise Exception("Can't set read only memory")

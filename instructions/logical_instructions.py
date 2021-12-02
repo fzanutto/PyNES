@@ -369,7 +369,6 @@ class OraZeroPage(ZeroPageAddressing, Ora):
 class OraIndIdx(IndirectIndexedAddressing, Ora):
     identifier_byte = bytes([0x11])
 
-
 class Eor(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True

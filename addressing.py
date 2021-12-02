@@ -61,7 +61,7 @@ class AbsoluteAddressing(Addressing):
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
-        return int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu)
+        return (int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu)) & 0xFFFF
 
 
 class AbsoluteAddressingWithX(XRegOffset, AbsoluteAddressing):

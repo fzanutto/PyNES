@@ -55,10 +55,6 @@ class LdaZeroPageX(ZeroPageAddressingWithX, Lda):
     identifier_byte = bytes([0xB5])
 
 
-class LdaZeroPageY(ZeroPageAddressingWithY, Lda):
-    identifier_byte = bytes([0xB6])
-
-
 class LdaAbsWithY(AbsoluteAddressingWithY, Lda):
     identifier_byte = bytes([0xB9])
 

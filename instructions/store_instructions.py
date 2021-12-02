@@ -54,5 +54,5 @@ class StyAbs(AbsoluteAddressing, Sty):
     identifier_byte = bytes([0x8C])
 
 
-class StyZeroPageY(ZeroPageAddressingWithY, Sty):
+class StyZeroPageX(ZeroPageAddressingWithX, Sty):
     identifier_byte = bytes([0x94])

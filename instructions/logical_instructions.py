@@ -59,7 +59,7 @@ class Cmp(Instruction):
         diff = cpu.a_reg - value
         cpu.status_reg.bits[Status.StatusTypes.carry] = diff >= 0
         cpu.status_reg.bits[Status.StatusTypes.zero] = diff == 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = diff & (1 << 7)
+        cpu.status_reg.bits[Status.StatusTypes.negative] = (diff & (1 << 7)) > 0
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:

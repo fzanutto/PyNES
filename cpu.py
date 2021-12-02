@@ -14,7 +14,8 @@ import instructions.load_instructions as l_file
 import instructions.store_instructions as s_file
 import instructions.stack_instructions as t_file
 import instructions.arithmetic_instructions as a_file
-import instructions.logical_instructions as l_file
+import instructions.logical_instructions as log_file
+import instructions.nop_instructions as n_file
 
 
 class CPU(object):

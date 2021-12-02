@@ -140,6 +140,8 @@ class AdcAbs(AbsoluteAddressing, Adc):
 class AdcAbsY(AbsoluteAddressingWithY, Adc):
     identifier_byte = bytes([0x79])
 
+class AdcAbsX(AbsoluteAddressingWithX, Adc):
+    identifier_byte = bytes([0x7D])
 
 class Iny(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0xC8])

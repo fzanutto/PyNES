@@ -45,7 +45,11 @@ class AndZeroPageX(ZeroPageAddressingWithX, And):
 class AndAbs(AbsoluteAddressing, And):
     identifier_byte = bytes([0x2D])
 
-class AndAbsX(AbsoluteAddressingWithY, And):
+
+class AndAbsX(AbsoluteAddressingWithX, And):
+    identifier_byte = bytes([0x3D])
+
+class AndAbsY(AbsoluteAddressingWithY, And):
     identifier_byte = bytes([0x39])
 
 
@@ -280,7 +284,7 @@ class RorAbs(AbsoluteAddressing, Ror):
     identifier_byte = bytes([0x6E])
 
 
-class RorAbsX(AbsoluteAddressing, Ror):
+class RorAbsX(AbsoluteAddressingWithX, Ror):
     identifier_byte = bytes([0x7E])
 
 class Rol(Instruction):
@@ -359,24 +363,29 @@ class OraImm(ImmediateReadAddressing, Ora):
         return mem_value | cpu.a_reg
 
 
-class OraAbs(AbsoluteAddressing, Ora):
-    identifier_byte = bytes([0x0D])
-
-
-class OraIdxInd(IndexedIndirectAddressing, Ora):
-    identifier_byte = bytes([0x01])
-
-
 class OraZeroPage(ZeroPageAddressing, Ora):
     identifier_byte = bytes([0x05])
 
 class OraZeroPageX(ZeroPageAddressingWithX, Ora):
     identifier_byte = bytes([0x15])
-class OraIndIdx(IndirectIndexedAddressing, Ora):
-    identifier_byte = bytes([0x11])
+
+class OraAbs(AbsoluteAddressing, Ora):
+    identifier_byte = bytes([0x0D])
 
 class OraAbsY(AbsoluteAddressingWithY, Ora):
     identifier_byte = bytes([0x19])
+
+class OraAbsX(AbsoluteAddressingWithX, Ora):
+    identifier_byte = bytes([0x1D])
+
+class OraIdxInd(IndexedIndirectAddressing, Ora):
+    identifier_byte = bytes([0x01])
+
+
+class OraIndIdx(IndirectIndexedAddressing, Ora):
+    identifier_byte = bytes([0x11])
+
+
 
 class Eor(Instruction):
     sets_zero_bit = True
@@ -419,3 +428,6 @@ class EorAbsolute(AbsoluteAddressing, Eor):
 
 class EorAbsoluteY(AbsoluteAddressingWithY, Eor):
     identifier_byte = bytes([0x59])
+
+class EorAbsoluteX(AbsoluteAddressingWithX, Eor):
+    identifier_byte = bytes([0x5D])

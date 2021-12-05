@@ -38,6 +38,7 @@ class AndIndIdx(IndirectIndexedAddressing, And):
 class AndZeroPage(ZeroPageAddressing, And):
     identifier_byte = bytes([0x25])
 
+
 class AndZeroPageX(ZeroPageAddressingWithX, And):
     identifier_byte = bytes([0x35])
 
@@ -48,6 +49,7 @@ class AndAbs(AbsoluteAddressing, And):
 
 class AndAbsX(AbsoluteAddressingWithX, And):
     identifier_byte = bytes([0x3D])
+
 
 class AndAbsY(AbsoluteAddressingWithY, And):
     identifier_byte = bytes([0x39])
@@ -69,6 +71,7 @@ class Cmp(Instruction):
 class CmpImm(ImmediateReadAddressing, Cmp):
     identifier_byte = bytes([0xC9])
 
+
 class CmpZeroPage(ZeroPageAddressing, Cmp):
     identifier_byte = bytes([0xC5])
 
@@ -76,8 +79,10 @@ class CmpZeroPage(ZeroPageAddressing, Cmp):
 class CmpZeroPageX(ZeroPageAddressingWithX, Cmp):
     identifier_byte = bytes([0xD5])
 
+
 class CmpAbs(AbsoluteAddressing, Cmp):
     identifier_byte = bytes([0xCD])
+
 
 class CmpAbsX(AbsoluteAddressingWithX, Cmp):
     identifier_byte = bytes([0xDD])
@@ -101,7 +106,7 @@ class Cpy(Instruction):
         diff = cpu.y_reg - value
         cpu.status_reg.bits[Status.StatusTypes.carry] = diff >= 0
         cpu.status_reg.bits[Status.StatusTypes.zero] = diff == 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = diff & (1 << 7)
+        cpu.status_reg.bits[Status.StatusTypes.negative] = (diff & (1 << 7)) > 0
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
@@ -182,14 +187,18 @@ class LsrImpl(ImplicitAddressing, Lsr):
 class LsrZeroPage(ZeroPageAddressing, Lsr):
     identifier_byte = bytes([0x46])
 
+
 class LsrZeroPageX(ZeroPageAddressingWithX, Lsr):
     identifier_byte = bytes([0x56])
+
 
 class LsrAbs(AbsoluteAddressing, Lsr):
     identifier_byte = bytes([0x4E])
 
+
 class LsrAbsX(AbsoluteAddressingWithX, Lsr):
     identifier_byte = bytes([0x5E])
+
 
 class Asl(Instruction):
     sets_zero_bit = True
@@ -230,12 +239,14 @@ class AslZeroPage(ZeroPageAddressing, Asl):
 class AslZeroPageX(ZeroPageAddressingWithX, Asl):
     identifier_byte = bytes([0x16])
 
+
 class AslAbs(AbsoluteAddressing, Asl):
     identifier_byte = bytes([0x0E])
 
 
 class AslAbsX(AbsoluteAddressingWithX, Asl):
     identifier_byte = bytes([0x1E])
+
 
 class Ror(Instruction):
     sets_zero_bit = True
@@ -277,8 +288,10 @@ class RorImpl(ImplicitAddressing, Ror):
 class RorZeroPage(ZeroPageAddressing, Ror):
     identifier_byte = bytes([0x66])
 
+
 class RorZeroPageX(ZeroPageAddressingWithX, Ror):
     identifier_byte = bytes([0x76])
+
 
 class RorAbs(AbsoluteAddressing, Ror):
     identifier_byte = bytes([0x6E])
@@ -286,6 +299,7 @@ class RorAbs(AbsoluteAddressing, Ror):
 
 class RorAbsX(AbsoluteAddressingWithX, Ror):
     identifier_byte = bytes([0x7E])
+
 
 class Rol(Instruction):
     sets_zero_bit = True
@@ -332,11 +346,14 @@ class RolZeroPage(ZeroPageAddressing, Rol):
 class RolZeroPageX(ZeroPageAddressingWithX, Rol):
     identifier_byte = bytes([0x36])
 
+
 class RolAbs(AbsoluteAddressing, Rol):
     identifier_byte = bytes([0x2E])
 
+
 class RolAbsX(AbsoluteAddressingWithX, Rol):
     identifier_byte = bytes([0x3E])
+
 
 class Ora(Instruction):
     sets_zero_bit = True
@@ -366,17 +383,22 @@ class OraImm(ImmediateReadAddressing, Ora):
 class OraZeroPage(ZeroPageAddressing, Ora):
     identifier_byte = bytes([0x05])
 
+
 class OraZeroPageX(ZeroPageAddressingWithX, Ora):
     identifier_byte = bytes([0x15])
+
 
 class OraAbs(AbsoluteAddressing, Ora):
     identifier_byte = bytes([0x0D])
 
+
 class OraAbsY(AbsoluteAddressingWithY, Ora):
     identifier_byte = bytes([0x19])
 
+
 class OraAbsX(AbsoluteAddressingWithX, Ora):
     identifier_byte = bytes([0x1D])
+
 
 class OraIdxInd(IndexedIndirectAddressing, Ora):
     identifier_byte = bytes([0x01])
@@ -384,7 +406,6 @@ class OraIdxInd(IndexedIndirectAddressing, Ora):
 
 class OraIndIdx(IndirectIndexedAddressing, Ora):
     identifier_byte = bytes([0x11])
-
 
 
 class Eor(Instruction):
@@ -423,11 +444,14 @@ class EorZeroPage(ZeroPageAddressing, Eor):
 class EorZeroPageX(ZeroPageAddressingWithX, Eor):
     identifier_byte = bytes([0x55])
 
+
 class EorAbsolute(AbsoluteAddressing, Eor):
     identifier_byte = bytes([0x4D])
 
+
 class EorAbsoluteY(AbsoluteAddressingWithY, Eor):
     identifier_byte = bytes([0x59])
+
 
 class EorAbsoluteX(AbsoluteAddressingWithX, Eor):
     identifier_byte = bytes([0x5D])

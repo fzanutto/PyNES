@@ -76,14 +76,13 @@ class SbcNop(ImmediateReadAddressing, Sbc):
         return super().sub_carry(cpu, memory_address, data_bytes, value)
 
 
-class Dcp(Instruction, WritesToMem):
+class Dcp(WritesToMem, Instruction):
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
         value = cpu.a_reg - value
         cpu.status_reg.bits[Status.StatusTypes.carry] = value >= 0
         cpu.status_reg.bits[Status.StatusTypes.zero] = value == 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = (
-            value & (1 << 7)) > 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = (value & (1 << 7)) > 0
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
@@ -119,7 +118,7 @@ class DcpIndIdx(IndirectIndexedAddressing, Dcp):
     identifier_byte = bytes([0xD3])
 
 
-class Isc(Instruction):
+class Isb(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -157,31 +156,31 @@ class Isc(Instruction):
         return sub
 
 
-class IscZeroPage(ZeroPageAddressing, Isc):
+class IsbZeroPage(ZeroPageAddressing, Isb):
     identifier_byte = bytes([0xE7])
 
 
-class IscZeroPageX(ZeroPageAddressingWithX, Isc):
+class IsbZeroPageX(ZeroPageAddressingWithX, Isb):
     identifier_byte = bytes([0xF7])
 
 
-class IscAbs(AbsoluteAddressing, Isc):
+class IsbAbs(AbsoluteAddressing, Isb):
     identifier_byte = bytes([0xEF])
 
 
-class IscAbsX(AbsoluteAddressingWithX, Isc):
+class IsbAbsX(AbsoluteAddressingWithX, Isb):
     identifier_byte = bytes([0xFF])
 
 
-class IscAbsY(AbsoluteAddressingWithY, Isc):
+class IsbAbsY(AbsoluteAddressingWithY, Isb):
     identifier_byte = bytes([0xFB])
 
 
-class IscIdxInd(IndexedIndirectAddressing, Isc):
+class IsbIdxInd(IndexedIndirectAddressing, Isb):
     identifier_byte = bytes([0xE3])
 
 
-class IscIndIdx(IndirectIndexedAddressing, Isc):
+class IsbIndIdx(IndirectIndexedAddressing, Isb):
     identifier_byte = bytes([0xF3])
 
 

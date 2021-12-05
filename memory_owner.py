@@ -30,9 +30,15 @@ class MemoryOwnerMixin(ABC):
         """
         return self.get_memory()[position - self.memory_start_location]
 
-    def get_bytes(self, position: int, size: int = 1):
+    def get_bytes(self, position: int, size: int = 1) -> bytes:
         initial_position = position - self.memory_start_location
-        return bytes(self.get_memory()[initial_position: initial_position + size])
+
+        value = self.get_memory()[initial_position: initial_position + size]
+
+        if type(value) is list:
+            value = b''.join(value)
+
+        return bytes(value)
 
     def set(self, position: int, value: int, size: int = 1):
         """
@@ -40,3 +46,6 @@ class MemoryOwnerMixin(ABC):
         """
         for i in range(size):
             self.get_memory()[position - self.memory_start_location + i] = (value >> (8*i)) & 255
+
+    def set_byte(self, position: int, value: bytes):
+        self.get_memory()[position - self.memory_start_location] = value

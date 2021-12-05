@@ -10,20 +10,26 @@ class ROM(MemoryOwnerMixin):
     memory_start_location = 0x8000
     memory_end_location = 0xFFFF
 
-    def __init__(self, rom_bytes: bytes):
-        self.header_size = 0x10  # 16 bytes
+    def __init__(self, rom_bytes: bytes, is_test_rom: bool = False):
+        self.header_size = 0  # 0x10  # 16 bytes
+        self.is_test_rom = is_test_rom
 
-        self.rom_bytes = rom_bytes
+        if self.header_size > 0:
+            self.rom_bytes = rom_bytes
 
-        self.num_prg_blocks = self.rom_bytes[4]
-        self.num_chr_rom_blocks = self.rom_bytes[5]
+            self.num_prg_blocks = self.rom_bytes[4]
+            self.num_chr_rom_blocks = self.rom_bytes[5]
+            # TODO flags 6, 7, 8, 9, 10
 
-        # TODO flags 6, 7, 8, 9, 10
-
-        # program data starts after header
-        # and lasts for a set number of 16KB blocks
-        self.prg_bytes = rom_bytes[self.header_size:
-                                   self.header_size + (16 * KB_SIZE * self.num_prg_blocks)]
+            # program data starts after header
+            # and lasts for a set number of 16KB blocks
+            self.prg_bytes = rom_bytes[self.header_size:
+                                       self.header_size + (16 * KB_SIZE * self.num_prg_blocks)]
+        else:
+            self.rom_bytes = rom_bytes
+            self.prg_bytes = rom_bytes
+            self.num_prg_blocks = 1
+            self.num_chr_rom_blocks = 1
 
     def get_memory(self) -> List[bytes]:
         return self.prg_bytes

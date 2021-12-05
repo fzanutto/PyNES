@@ -1,5 +1,5 @@
-from typing import List
-
+from typing import Dict, List
+from time import time_ns
 from instructions.generic_instructions import Instruction
 from io_registers import IO_Registers
 from memory_owner import MemoryOwnerMixin
@@ -17,6 +17,7 @@ import instructions.arithmetic_instructions as a_file
 import instructions.logical_instructions as log_file
 import instructions.nop_instructions as n_file
 import instructions.unofficial_instructions as u_file
+
 
 class CPU(object):
     def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers):
@@ -48,13 +49,13 @@ class CPU(object):
 
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)
-        self.instructions = {}
+        self.instructions: Dict[bytes, Instruction] = {}
         for instruction in instructions_list:
             if instruction.identifier_byte in self.instructions.keys():
                 raise Exception('Duplicate instruction identifier bytes ' + instruction.identifier_byte.hex())
             self.instructions[instruction.identifier_byte] = instruction
 
-    def start_up(self):
+    def start_up(self, callback):
         """
         set the initial values of cpu registers
         status reg: 000100 (irqs disabled)
@@ -64,6 +65,9 @@ class CPU(object):
         $4015: 0 (sound channels disabled)
         $4000-$400F: 0 (sound registers)
         """
+
+        self.callback = callback
+
         # TODO Hex vs binary
         self.pc_reg = 0
         self.status_reg = Status()  # know as 'P' on NesDev Wiki
@@ -119,7 +123,7 @@ class CPU(object):
 
         return value
 
-    def find_instructions(self, cls):
+    def find_instructions(self, cls) -> list[Instruction]:
         """
         find all available instructions
         """
@@ -139,9 +143,16 @@ class CPU(object):
         # load the rom program instruction into memory
         self.memory_owners.append(self.rom)
 
+        if rom.is_test_rom:
+            self.pc_reg = 0x0600
+            self.rom.memory_start_location = 0
+            for i in range(len(rom.get_memory())):
+                self.ram.set_byte(0x0600 + i, rom.get(i))
+
         # run program
         self.running = True
         i = 0
+        last_time = time_ns()
         while self.running:
             i += 1
             # get the current byte at pc
@@ -160,22 +171,24 @@ class CPU(object):
             ]
 
             # turn the byte into an Instruction
-            instruction: Instruction = self.instructions.get(
-                identifier_byte, None)
+            instruction = self.instructions.get(identifier_byte)
+
             if instruction is None:
                 print(registers_state, hex(self.pc_reg), identifier_byte)
-                raise Exception('pc: {} Instruction not found: {}'.format(hex(self.pc_reg),
+                raise Exception('PC: {} Instruction not found: {}'.format(hex(self.pc_reg),
                                                                           identifier_byte))
 
             # get the data bytes
-            data_bytes = self.get_memory_owner(self.pc_reg + 1).get_bytes(self.pc_reg + 1, instruction.data_length)
+            data_bytes = self.get_memory_owner(
+                self.pc_reg + 1).get_bytes(self.pc_reg + 1, instruction.data_length)
 
+            '''
             # print out diagnostic information
             # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
             inst_bytes = (identifier_byte + data_bytes).hex().upper()
             rng = range(0, len(inst_bytes), 2)
             inst_hexes = [inst_bytes[i:i + 2] for i in rng]
-
+            
             print("{} {}  {:<8}  {:<11}        A:{:<2} X:{:<2} Y:{:<2} P:{:<2}  SP:{}".format(
                 i,
                 hex(self.pc_reg)[2:].upper(),
@@ -183,10 +196,19 @@ class CPU(object):
                 instruction.__name__,
                 *registers_state
             ))
-
+            '''
             self.pc_reg += instruction.get_instruction_length()
 
-            # we have a valid instruction class
             value = instruction.execute(self, data_bytes)
 
             self.status_reg.update(instruction, value)
+
+            cur_time = time_ns()
+            if cur_time - last_time > 0:
+                print('time for running instruction', cur_time - last_time, identifier_byte)
+            last_time = cur_time
+            self.callback()
+            cur_time = time_ns()
+            if cur_time - last_time > 0:
+                print('time for running ui', cur_time - last_time)
+            last_time = cur_time

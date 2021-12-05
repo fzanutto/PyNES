@@ -68,3 +68,22 @@ class BitZeroPage(ZeroPageAddressing, Bit):
 
 class BitAbsolute(AbsoluteAddressing, Bit):
     identifier_byte = bytes([0x2C])
+
+
+class Brk(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0x00])
+
+    @classmethod
+    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+        return super().get_data(cpu, memory_address, data_bytes)
+
+    @classmethod
+    def write(cls, cpu, memory_address, value):
+        cpu.push_to_stack(cpu.pc_reg + 1, 2)
+
+        cpu.push_to_stack(cpu.status_reg.to_int() | (1 << 4), 1)
+
+    @classmethod
+    def apply_side_effects(cls, cpu, memory_address, value):
+        cpu.status_reg.bits[Status.StatusTypes.interrupt] = 1
+        cpu.running = False

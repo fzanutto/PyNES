@@ -3,7 +3,7 @@
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX, ZeroPageAddressingWithY
 from instructions.arithmetic_instructions import Sbc
 from instructions.base_instructions import Ld
-from instructions.generic_instructions import Instruction
+from instructions.generic_instructions import Instruction, WritesToMem
 from status import Status
 
 
@@ -76,7 +76,7 @@ class SbcNop(ImmediateReadAddressing, Sbc):
         return super().sub_carry(cpu, memory_address, data_bytes, value)
 
 
-class Dcp(Instruction):
+class Dcp(Instruction, WritesToMem):
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
         value = cpu.a_reg - value
@@ -89,10 +89,6 @@ class Dcp(Instruction):
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.get_memory(memory_address)
         return value - 1 if value > 0 else 255
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value)
 
 
 class DcpZeroPage(ZeroPageAddressing, Dcp):

@@ -35,7 +35,7 @@ class Instruction:
         return value
 
 
-class WritesToMem(object):
+class WritesToMem:
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.set_memory(memory_address, value)

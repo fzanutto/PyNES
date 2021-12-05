@@ -1,7 +1,7 @@
-from memory_owner import MemoryOwnerMixin
+from memory_owner import MemoryOwner
 
 
-class IO_Registers(MemoryOwnerMixin, object):
+class IO_Registers(MemoryOwner, object):
     memory_start_location = 0x4000
     memory_end_location = 0x401F
 

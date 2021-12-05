@@ -1,33 +1,15 @@
-from abc import abstractmethod, ABC, abstractproperty
-from typing import List
 
+class MemoryOwner:
 
-class MemoryOwnerMixin(ABC):
-    # TODO check we have correct amount of memory
-    @abstractproperty
-    @property
-    def memory_start_location(self) -> int:
-        """
-        inclusive
-        """
-        pass
+    def __init__(self, mem_start: int, mem_end: int):
+        self.memory_start_location = mem_start
+        self.memory_end_location = mem_end
+        self.memory = [0] * (mem_end - mem_start)
 
-    @abstractproperty
-    @property
-    def memory_end_location(self) -> int:
-        """
-        inclusive
-        """
-        pass
+    def get_memory(self) -> list[int]:
+        return self.memory
 
-    @abstractmethod
-    def get_memory(self) -> List[int]:
-        pass
-
-    def get(self, position: int):
-        """
-        gets int at given position
-        """
+    def get(self, position: int) -> int:
         return self.get_memory()[position - self.memory_start_location]
 
     def get_bytes(self, position: int, size: int = 1) -> bytes:

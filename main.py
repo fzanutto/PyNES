@@ -1,4 +1,5 @@
 import argparse
+from bus import Bus
 from cpu import CPU
 from io_registers import IO_Registers
 from ram import RAM
@@ -54,8 +55,10 @@ def main():
 
     io_regs = IO_Registers()
 
+    bus = Bus(ram, ppu, io_regs, rom)
+
     # create cpu
-    cpu = CPU(ram, ppu, io_regs)
+    cpu = CPU(ram, ppu, io_regs, bus)
 
     ui = UI(cpu)
 

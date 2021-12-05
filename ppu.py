@@ -1,7 +1,7 @@
-from memory_owner import MemoryOwnerMixin
+from memory_owner import MemoryOwner
 
 
-class PPU(MemoryOwnerMixin, object):
+class PPU(MemoryOwner):
     '''
     $2000 -> PPUCTRL: PPU control register. Access: write
     $2001 -> PPUMASK: PPu mask register. Access: write
@@ -12,11 +12,6 @@ class PPU(MemoryOwnerMixin, object):
     $2006 -> PPUADDR: PPU address register. Access: write twice
     $2007 -> PPUDATA: PPU data register. Access: read, write
     '''
-    memory_start_location = 0x2000
-    memory_end_location = 0x2007
 
     def __init__(self):
-        self.memory: list[int] = [0]*8
-
-    def get_memory(self) -> list[int]:
-        return self.memory
+        super().__init__(0x2000, 0x2007)

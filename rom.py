@@ -1,11 +1,11 @@
 from typing import List
 
-from memory_owner import MemoryOwnerMixin
+from memory_owner import MemoryOwner
 
 KB_SIZE = 1024
 
 
-class ROM(MemoryOwnerMixin):
+class ROM(MemoryOwner):
     # rom memory is duplicated around 0xC000
     memory_start_location = 0x8000
     memory_end_location = 0xFFFF

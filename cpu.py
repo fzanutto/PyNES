@@ -1,8 +1,9 @@
 from typing import Dict, List
 from time import time_ns
+from bus import Bus
 from instructions.generic_instructions import Instruction
 from io_registers import IO_Registers
-from memory_owner import MemoryOwnerMixin
+from memory_owner import MemoryOwner
 from ppu import PPU
 from ram import RAM
 from rom import ROM
@@ -19,14 +20,15 @@ import instructions.nop_instructions as n_file
 import instructions.unofficial_instructions as u_file
 
 
-class CPU(object):
-    def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers):
+class CPU:
+    def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers, bus: Bus):
         self.ram = ram
         self.ppu = ppu
         self.io_regs = io_regs
         self.rom = None
+        self.bus = bus
 
-        self.memory_owners: List[MemoryOwnerMixin] = [
+        self.memory_owners: List[MemoryOwner] = [
             self.ram,
             self.ppu,
             self.io_regs
@@ -83,13 +85,9 @@ class CPU(object):
         self.set_memory(0x4017, 0, num_bytes=2)
 
     def get_memory(self, location: int) -> int:
-        """
-        returns a byte from a given memory location
-        """
-        memory_owner = self.get_memory_owner(location)
-        return memory_owner.get(location)
+        return self.bus.read_memory(location)
 
-    def get_memory_owner(self, location: int) -> MemoryOwnerMixin:
+    def get_memory_owner(self, location: int) -> MemoryOwner:
         """
         return the owner of a memory location
         """
@@ -101,11 +99,7 @@ class CPU(object):
         raise Exception('Cannot find memory owner')
 
     def set_memory(self, location: int, value: int, *, num_bytes: int = 1):
-        """
-        sets the memory at a location to a value
-        """
-        memory_owner = self.get_memory_owner(location)
-        memory_owner.set(location, value, num_bytes)
+        self.bus.write_memory(location, value, num_bytes)
 
     def push_to_stack(self, value, size):
 
@@ -147,7 +141,7 @@ class CPU(object):
             self.pc_reg = 0x0600
             self.rom.memory_start_location = 0
             for i in range(len(rom.get_memory())):
-                self.ram.set_byte(0x0600 + i, rom.get(i))
+                self.set_memory(0x0600 + i, rom.get(i))
 
         # run program
         self.running = True
@@ -156,8 +150,7 @@ class CPU(object):
         while self.running:
             i += 1
             # get the current byte at pc
-            identifier_byte = self.get_memory_owner(
-                self.pc_reg).get(self.pc_reg)
+            identifier_byte = self.bus.read_memory(self.pc_reg)
 
             if type(identifier_byte) == int:
                 identifier_byte = bytes([identifier_byte])

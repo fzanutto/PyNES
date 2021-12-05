@@ -139,8 +139,7 @@ class Isb(Instruction):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
-        sub = cpu.a_reg + value + \
-            int(cpu.status_reg.bits[Status.StatusTypes.carry])
+        sub = cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry])
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = sub > 255
 

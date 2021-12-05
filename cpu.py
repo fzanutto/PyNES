@@ -182,21 +182,7 @@ class CPU(object):
             data_bytes = self.get_memory_owner(
                 self.pc_reg + 1).get_bytes(self.pc_reg + 1, instruction.data_length)
 
-            '''
-            # print out diagnostic information
-            # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
-            inst_bytes = (identifier_byte + data_bytes).hex().upper()
-            rng = range(0, len(inst_bytes), 2)
-            inst_hexes = [inst_bytes[i:i + 2] for i in rng]
-            
-            print("{} {}  {:<8}  {:<11}        A:{:<2} X:{:<2} Y:{:<2} P:{:<2}  SP:{}".format(
-                i,
-                hex(self.pc_reg)[2:].upper(),
-                ' '.join(inst_hexes),
-                instruction.__name__,
-                *registers_state
-            ))
-            '''
+            old_pc_reg = self.pc_reg
             self.pc_reg += instruction.get_instruction_length()
 
             value = instruction.execute(self, data_bytes)
@@ -205,10 +191,25 @@ class CPU(object):
 
             cur_time = time_ns()
             if cur_time - last_time > 0:
-                print('time for running instruction', cur_time - last_time, identifier_byte)
+                #print('time for running instruction', cur_time - last_time, identifier_byte)
+                pass
             last_time = cur_time
             self.callback()
             cur_time = time_ns()
             if cur_time - last_time > 0:
-                print('time for running ui', cur_time - last_time)
+                #print('time for running ui', cur_time - last_time)
+                pass
             last_time = cur_time
+
+            # print out diagnostic information
+            # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
+            inst_bytes = (identifier_byte + data_bytes).hex().upper()
+            rng = range(0, len(inst_bytes), 2)
+            inst_hexes = [inst_bytes[i:i + 2] for i in rng]
+
+            print("{:0>4}  {:<8}  {:<31} A:{:0>2} X:{:0>2} Y:{:0>2} P:{:0>2} SP:{}".format(
+                hex(old_pc_reg)[2:].upper(),
+                ' '.join(inst_hexes),
+                instruction.__name__[0:3].upper(),
+                *registers_state
+            ))

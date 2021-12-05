@@ -35,6 +35,9 @@ class MemoryOwnerMixin(ABC):
 
         value = self.get_memory()[initial_position: initial_position + size]
 
+        if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
+            value = b''.join(value)
+
         return bytes(value)
 
     def set(self, position: int, value: int, size: int = 1):

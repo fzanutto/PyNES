@@ -43,8 +43,8 @@ def main():
         0xea, 0xca, 0xd0, 0xfb, 0x60
     ])))
 
-    #rom = ROM(rom_bytes)
-    rom = ROM(test_game, True)
+    rom = ROM(rom_bytes)
+    #rom = ROM(test_game, True)
 
     # create ram
     ram = RAM()
@@ -58,7 +58,6 @@ def main():
     cpu = CPU(ram, ppu, io_regs)
 
     ui = UI(cpu)
-    ui.update_ui()
 
     cpu.start_up(ui.handle_and_update_ui)
     cpu.run_rom(rom)

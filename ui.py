@@ -69,5 +69,6 @@ class UI():
                 sys.exit()
 
     def handle_ui(self):
-        self.handle_user_input()
-        self.update_ui()
+        # self.handle_user_input()
+        # self.update_ui()
+        pass

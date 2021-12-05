@@ -87,17 +87,6 @@ class CPU:
     def get_memory(self, location: int) -> int:
         return self.bus.read_memory(location)
 
-    def get_memory_owner(self, location: int) -> MemoryOwner:
-        """
-        return the owner of a memory location
-        """
-        # check if memory owner
-        for memory_owner in self.memory_owners:
-            if memory_owner.memory_start_location <= location <= memory_owner.memory_end_location:
-                return memory_owner
-
-        raise Exception('Cannot find memory owner')
-
     def set_memory(self, location: int, value: int, *, num_bytes: int = 1):
         self.bus.write_memory(location, value, num_bytes)
 
@@ -172,8 +161,7 @@ class CPU:
                                                                           identifier_byte))
 
             # get the data bytes
-            data_bytes = self.get_memory_owner(
-                self.pc_reg + 1).get_bytes(self.pc_reg + 1, instruction.data_length)
+            data_bytes = self.bus.read_memory_bytes(self.pc_reg + 1, instruction.data_length)
 
             old_pc_reg = self.pc_reg
             self.pc_reg += instruction.get_instruction_length()

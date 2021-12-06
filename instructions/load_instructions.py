@@ -44,7 +44,7 @@ class LdaAbs(AbsoluteAddressing, Lda):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.bus.read_memory(memory_address)
 
 
 class LdaIndIdx(IndirectIndexedAddressing, Lda):

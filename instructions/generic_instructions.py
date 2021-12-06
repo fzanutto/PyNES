@@ -38,4 +38,4 @@ class Instruction:
 class WritesToMem:
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value)
+        cpu.bus.write_memory(memory_address, value)

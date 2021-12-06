@@ -46,7 +46,7 @@ class Sax(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class SaxZeroPage(ZeroPageAddressing, Sax):
@@ -86,7 +86,7 @@ class Dcp(WritesToMem, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         return value - 1 if value > 0 else 255
 
 
@@ -124,8 +124,8 @@ class Isb(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        mem_value = (cpu.get_memory(memory_address) + 1) % 256
-        cpu.set_memory(memory_address, mem_value)
+        mem_value = (cpu.bus.read_memory(memory_address) + 1) % 256
+        cpu.bus.write_memory(memory_address, mem_value)
 
         mem_value = (~mem_value) & 255
 
@@ -194,10 +194,10 @@ class Slo(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         value = cls.asl(cpu, value)
 
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
         return value | cpu.a_reg
 
@@ -240,11 +240,11 @@ class Rla(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
 
         value = cls.rol(cpu, value)
 
-        cpu.set_memory(memory_address, value)
+        cpu.bus.write_memory(memory_address, value)
 
         return cpu.a_reg & value
 
@@ -307,10 +307,10 @@ class Sre(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         value = cls.lsr(cpu, value)
 
-        cpu.set_memory(memory_address, value)
+        cpu.bus.write_memory(memory_address, value)
 
         return cpu.a_reg ^ value
 
@@ -349,11 +349,11 @@ class Rra(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
 
         value = cls.ror(cpu, value)
 
-        cpu.set_memory(memory_address, value)
+        cpu.bus.write_memory(memory_address, value)
 
         return cls.add_carry(cpu, value)
 

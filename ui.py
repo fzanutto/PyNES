@@ -30,10 +30,10 @@ class UI():
             15: pygame.color.THECOLORS['cyan'],
         }
         self.screen_buffer = [0] * 32 * 32
-        self.memory_owner = cpu.get_memory(0x200)
+        self.memory_owner = cpu.bus.read_memory(0x200)
 
     def update_ui(self):
-        self.cpu.set_memory(0xFE, random.randint(1, 16))
+        self.cpu.bus.write_memory(0xFE, random.randint(1, 16))
         mem = self.memory_owner.get_memory()[0x200: 0x600]
         for i in range(0x0200, 0x0600):
             index = i - 0x0200

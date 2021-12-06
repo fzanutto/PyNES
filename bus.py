@@ -62,12 +62,12 @@ class Bus:
 
         return bytes(value)
 
-    def write_memory(self, position: int, value: int, size: int = 1):
+    def write_memory(self, position: int, value: int, num_bytes: int = 1):
         mem_owner = self.get_memory_owner(position)
 
         position = self.get_actual_location(mem_owner, position)
 
-        for i in range(size):
+        for i in range(num_bytes):
             mem_owner.get_memory()[position - mem_owner.memory_start_location + i] = (value >> (8*i)) & 255
 
     def write_memory_byte(self, position: int, value: bytes):

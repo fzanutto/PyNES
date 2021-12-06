@@ -34,7 +34,7 @@ class Sbc(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         value = (~value) & 255
 
         return cls.sub_carry(cpu, memory_address, data_bytes, value)
@@ -104,7 +104,7 @@ class Adc(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes):
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
 
         return cls.add_carry(cpu, memory_address, data_bytes, value)
 
@@ -209,11 +209,11 @@ class Inc(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return (cpu.get_memory(memory_address) + 1) % 256
+        return (cpu.bus.read_memory(memory_address) + 1) % 256
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class IncZeroPage(ZeroPageAddressing, Inc):
@@ -234,12 +234,12 @@ class Dec(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         return value - 1 if value > 0 else 255
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class DecZeroPage(ZeroPageAddressing, Dec):

@@ -49,7 +49,7 @@ class Cli(ClearBit):
 class Bit(Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.bus.read_memory(memory_address)
 
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):

@@ -14,7 +14,7 @@ class And(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        mem_value = cpu.get_memory(memory_address)
+        mem_value = cpu.bus.read_memory(memory_address)
 
         return mem_value & cpu.a_reg
 
@@ -65,7 +65,7 @@ class Cmp(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.bus.read_memory(memory_address)
 
 
 class CmpImm(ImmediateReadAddressing, Cmp):
@@ -110,7 +110,7 @@ class Cpy(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.bus.read_memory(memory_address)
 
 
 class CpyImm(ImmediateReadAddressing, Cpy):
@@ -136,7 +136,7 @@ class Cpx(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.get_memory(memory_address)
+        return cpu.bus.read_memory(memory_address)
 
 
 class CpxImm(ImmediateReadAddressing, Cpx):
@@ -157,7 +157,7 @@ class Lsr(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
     def lsr(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
@@ -168,7 +168,7 @@ class Lsr(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         return cls.lsr(cpu, value)
 
 
@@ -211,12 +211,12 @@ class Asl(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
         return cls.asl(cpu, value)
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        return cpu.set_memory(memory_address, value, num_bytes=1)
+        return cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class AslImpl(ImplicitAddressing, Asl):
@@ -254,7 +254,7 @@ class Ror(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
 
         return cls.ror(cpu, value)
 
@@ -269,7 +269,7 @@ class Ror(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class RorImpl(ImplicitAddressing, Ror):
@@ -307,7 +307,7 @@ class Rol(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        value = cpu.get_memory(memory_address)
+        value = cpu.bus.read_memory(memory_address)
 
         return cls.rol(cpu, value)
 
@@ -322,7 +322,7 @@ class Rol(Instruction):
 
     @classmethod
     def write(cls, cpu, memory_address, value):
-        cpu.set_memory(memory_address, value, num_bytes=1)
+        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class RolImp(ImplicitAddressing, Rol):
@@ -361,7 +361,7 @@ class Ora(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes):
-        mem_value = cpu.get_memory(memory_address)
+        mem_value = cpu.bus.read_memory(memory_address)
 
         return mem_value | cpu.a_reg
 
@@ -418,7 +418,7 @@ class Eor(Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes):
-        return cpu.a_reg ^ cpu.get_memory(memory_address)
+        return cpu.a_reg ^ cpu.bus.read_memory(memory_address)
 
 
 class EorImm(ImmediateReadAddressing, Eor):

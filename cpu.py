@@ -81,19 +81,12 @@ class CPU:
 
         # TODO implement memory sets
 
-        self.set_memory(0x4015, 0, num_bytes=2)
-        self.set_memory(0x4017, 0, num_bytes=2)
-
-    def get_memory(self, location: int) -> int:
-        return self.bus.read_memory(location)
-
-    def set_memory(self, location: int, value: int, *, num_bytes: int = 1):
-        self.bus.write_memory(location, value, num_bytes)
+        self.bus.write_memory(0x4015, 0, num_bytes=2)
+        self.bus.write_memory(0x4017, 0, num_bytes=2)
 
     def push_to_stack(self, value, size):
-
         for i in range(size):
-            self.set_memory(0x0100 + self.sp_reg,
+            self.bus.write_memory(0x0100 + self.sp_reg,
                             (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
             self.sp_reg -= 1
 
@@ -102,7 +95,7 @@ class CPU:
 
         for i in range(size):
             self.sp_reg += 1
-            value += self.get_memory(0x0100 + self.sp_reg) << (8 * i)
+            value += self.bus.read_memory(0x0100 + self.sp_reg) << (8 * i)
 
         return value
 
@@ -110,8 +103,8 @@ class CPU:
         """
         find all available instructions
         """
-        subclasses = [subc for subc in cls.__subclasses__(
-        ) if subc.identifier_byte is not None]
+        
+        subclasses = [subc for subc in cls.__subclasses__() if subc.identifier_byte is not None]
         return subclasses + [g for s in cls.__subclasses__() for g in self.find_instructions(s)]
 
     def run_rom(self, rom: ROM):
@@ -130,7 +123,7 @@ class CPU:
             self.pc_reg = 0x0600
             self.rom.memory_start_location = 0
             for i in range(len(rom.get_memory())):
-                self.set_memory(0x0600 + i, rom.get(i))
+                self.bus.write_memory(0x0600 + i, rom.get(i))
 
         # run program
         self.running = True
@@ -144,26 +137,17 @@ class CPU:
             if type(identifier_byte) == int:
                 identifier_byte = bytes([identifier_byte])
 
-            registers_state = [
-                hex(self.a_reg)[2:].upper(),
-                hex(self.x_reg)[2:].upper(),
-                hex(self.y_reg)[2:].upper(),
-                hex(self.status_reg.to_int())[2:].upper(),
-                hex(self.sp_reg)[2:].upper()
-            ]
-
             # turn the byte into an Instruction
             instruction = self.instructions.get(identifier_byte)
 
             if instruction is None:
-                print(registers_state, hex(self.pc_reg), identifier_byte)
-                raise Exception('PC: {} Instruction not found: {}'.format(hex(self.pc_reg),
-                                                                          identifier_byte))
+                raise Exception('PC: {} Instruction not found: {}'.format(hex(self.pc_reg), identifier_byte))
 
             # get the data bytes
             data_bytes = self.bus.read_memory_bytes(self.pc_reg + 1, instruction.data_length)
 
-            old_pc_reg = self.pc_reg
+            self.debug_print(self.pc_reg, identifier_byte, data_bytes, instruction)
+
             self.pc_reg += instruction.get_instruction_length()
 
             value = instruction.execute(self, data_bytes)
@@ -182,15 +166,27 @@ class CPU:
                 pass
             last_time = cur_time
 
-            # print out diagnostic information
-            # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
-            inst_bytes = (identifier_byte + data_bytes).hex().upper()
-            rng = range(0, len(inst_bytes), 2)
-            inst_hexes = [inst_bytes[i:i + 2] for i in rng]
+            
 
-            print("{:0>4}  {:<8}  {:<31} A:{:0>2} X:{:0>2} Y:{:0>2} P:{:0>2} SP:{}".format(
-                hex(old_pc_reg)[2:].upper(),
-                ' '.join(inst_hexes),
-                instruction.__name__[0:3].upper(),
-                *registers_state
-            ))
+    def debug_print(self, pc_reg: int, identifier_byte, data_bytes, instruction):
+        # print out diagnostic information
+        # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
+
+        registers_state = [
+            hex(self.a_reg)[2:].upper(),
+            hex(self.x_reg)[2:].upper(),
+            hex(self.y_reg)[2:].upper(),
+            hex(self.status_reg.to_int())[2:].upper(),
+            hex(self.sp_reg)[2:].upper()
+        ]
+
+        inst_bytes = (identifier_byte + data_bytes).hex().upper()
+        rng = range(0, len(inst_bytes), 2)
+        inst_hexes = [inst_bytes[i:i + 2] for i in rng]
+
+        print("{:0>4}  {:<8}  {:<31} A:{:0>2} X:{:0>2} Y:{:0>2} P:{:0>2} SP:{}".format(
+            hex(pc_reg)[2:].upper(),
+            ' '.join(inst_hexes),
+            instruction.__name__[0:3].upper(),
+            *registers_state
+        ))

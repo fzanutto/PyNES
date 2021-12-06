@@ -130,8 +130,8 @@ class IndirectBase(Addressing):
     def get_address(cls, cpu: 'c.CPU', data_bytes):
         original_location = super().get_address(cpu, data_bytes)
 
-        lsb = cpu.get_memory(original_location)
-        msb = cpu.get_memory((original_location + 1) % 256)
+        lsb = cpu.bus.read_memory(original_location)
+        msb = cpu.bus.read_memory((original_location + 1) % 256)
 
         return msb * 256 + lsb
 
@@ -145,13 +145,13 @@ class IndirectAddressing(AbsoluteAddressing):
     def get_address(cls, cpu: 'c.CPU', data_bytes):
         original_location = super().get_address(cpu, data_bytes)
 
-        lsb = cpu.get_memory(original_location)
+        lsb = cpu.bus.read_memory(original_location)
 
         if original_location & 0xFF == 0xFF:
             original_location = (original_location >> 8) << 8
             original_location -= 1
 
-        msb = cpu.get_memory(original_location + 1)
+        msb = cpu.bus.read_memory(original_location + 1)
 
         return msb * 256 + lsb
 

@@ -5,7 +5,6 @@ from io_registers import IO_Registers
 from ram import RAM
 from ppu import PPU
 from rom import ROM
-from ui import UI
 
 
 def main():
@@ -44,6 +43,8 @@ def main():
         0xea, 0xca, 0xd0, 0xfb, 0x60
     ])))
 
+    is_test = False
+
     rom = ROM(rom_bytes)
     #rom = ROM(test_game, True)
 
@@ -60,9 +61,15 @@ def main():
     # create cpu
     cpu = CPU(ram, ppu, io_regs, bus)
 
-    ui = UI(cpu)
+    if is_test:
+        from ui import UI
+        ui = UI(cpu)
+        cpu.start_up(ui.handle_and_update_ui)
+    else:
+        def dummy():
+            pass
+        cpu.start_up(dummy)
 
-    cpu.start_up(ui.handle_and_update_ui)
     cpu.run_rom(rom)
 
 

@@ -1,11 +1,7 @@
-from typing import Dict, List
+from typing import Dict
 from time import time_ns
 from bus import Bus
 from instructions.generic_instructions import Instruction
-from io_registers import IO_Registers
-from memory_owner import MemoryOwner
-from ppu import PPU
-from ram import RAM
 from rom import ROM
 from status import Status
 
@@ -21,18 +17,9 @@ import instructions.unofficial_instructions as u_file
 
 
 class CPU:
-    def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers, bus: Bus):
-        self.ram = ram
-        self.ppu = ppu
-        self.io_regs = io_regs
+    def __init__(self, bus: Bus):
         self.rom = None
         self.bus = bus
-
-        self.memory_owners: List[MemoryOwner] = [
-            self.ram,
-            self.ppu,
-            self.io_regs
-        ]
 
         # status registers: store a single byte
         self.status_reg: Status = None
@@ -70,7 +57,6 @@ class CPU:
 
         self.callback = callback
 
-        # TODO Hex vs binary
         self.pc_reg = 0
         self.status_reg = Status()  # know as 'P' on NesDev Wiki
         self.sp_reg = 0xFD
@@ -108,16 +94,9 @@ class CPU:
         return subclasses + [g for s in cls.__subclasses__() for g in self.find_instructions(s)]
 
     def run_rom(self, rom: ROM):
-        # unload old rom
-        if self.rom is not None:
-            self.memory_owners.remove(self.rom)
-
         # load rom
         self.rom = rom
         self.pc_reg = 0xC000  # first rom address
-
-        # load the rom program instruction into memory
-        self.memory_owners.append(self.rom)
 
         if rom.is_test_rom:
             self.pc_reg = 0x0600

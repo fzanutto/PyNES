@@ -57,7 +57,7 @@ class Status:
     def to_int(self) -> int:
         value = 0
         for i, bit in enumerate(self.bits.values()):
-            value += int(bit) * (2 ** i)
+            value += int(bit) << i
         return value
 
     def from_int(self, value: int):

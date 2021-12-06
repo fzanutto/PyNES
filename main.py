@@ -59,7 +59,7 @@ def main():
     bus = Bus(ram, ppu, io_regs, rom)
 
     # create cpu
-    cpu = CPU(ram, ppu, io_regs, bus)
+    cpu = CPU(bus)
 
     if is_test:
         from ui import UI

@@ -30,7 +30,7 @@ class UI():
             15: pygame.color.THECOLORS['cyan'],
         }
         self.screen_buffer = [0] * 32 * 32
-        self.memory_owner = self.cpu.bus.read_memory(0x200)
+        self.memory_owner = self.cpu.bus.get_memory_owner(0x200)
 
     def update_ui(self):
         self.cpu.bus.write_memory(0xFE, random.randint(1, 16))
@@ -69,6 +69,5 @@ class UI():
                 sys.exit()
 
     def handle_ui(self):
-        # self.handle_user_input()
-        # self.update_ui()
-        pass
+        self.handle_user_input()
+        self.update_ui()

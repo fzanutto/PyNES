@@ -17,10 +17,10 @@ import instructions.unofficial_instructions as u_file
 
 
 class CPU:
-    def __init__(self, bus: Bus):
+    def __init__(self, bus: Bus, debug: bool = False):
         self.rom = None
         self.bus = bus
-
+        self.debug = debug
         # status registers: store a single byte
         self.status_reg: Status = None
 
@@ -73,7 +73,7 @@ class CPU:
     def push_to_stack(self, value, size):
         for i in range(size):
             self.bus.write_memory(0x0100 + self.sp_reg,
-                            (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
+                                  (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
             self.sp_reg -= 1
 
     def pull_from_stack(self, size):
@@ -89,7 +89,7 @@ class CPU:
         """
         find all available instructions
         """
-        
+
         subclasses = [subc for subc in cls.__subclasses__() if subc.identifier_byte is not None]
         return subclasses + [g for s in cls.__subclasses__() for g in self.find_instructions(s)]
 
@@ -98,11 +98,11 @@ class CPU:
         self.rom = rom
         self.pc_reg = 0xC000  # first rom address
 
-        if rom.is_test_rom:
+        if rom.is_snake_rom:
             self.pc_reg = 0x0600
             self.rom.memory_start_location = 0
             for i in range(len(rom.get_memory())):
-                self.bus.write_memory(0x0600 + i, rom.get(i))
+                self.bus.write_memory(0x0600 + i, int.from_bytes(rom.get(i), 'little'))
 
         # run program
         self.running = True
@@ -125,7 +125,8 @@ class CPU:
             # get the data bytes
             data_bytes = self.bus.read_memory_bytes(self.pc_reg + 1, instruction.data_length)
 
-            self.debug_print(self.pc_reg, identifier_byte, data_bytes, instruction)
+            if self.debug:
+                self.debug_print(self.pc_reg, identifier_byte, data_bytes, instruction)
 
             self.pc_reg += instruction.get_instruction_length()
 
@@ -134,18 +135,20 @@ class CPU:
             self.status_reg.update(instruction, value)
 
             cur_time = time_ns()
-            if cur_time - last_time > 0:
-                #print('time for running instruction', cur_time - last_time, identifier_byte)
-                pass
-            last_time = cur_time
-            self.callback()
-            cur_time = time_ns()
-            if cur_time - last_time > 0:
-                #print('time for running ui', cur_time - last_time)
-                pass
+
+            if self.debug and cur_time - last_time > 0:
+                print('time for running instruction', cur_time - last_time, identifier_byte)
+
             last_time = cur_time
 
-            
+            self.callback()
+
+            cur_time = time_ns()
+
+            if self.debug and cur_time - last_time > 0:
+                print('time for running ui', cur_time - last_time)
+
+            last_time = cur_time
 
     def debug_print(self, pc_reg: int, identifier_byte, data_bytes, instruction):
         # print out diagnostic information

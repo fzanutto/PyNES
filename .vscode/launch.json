@@ -1,12 +1,12 @@
 {
     "configurations": [
         {
-            "name": "Python SMB ROM",
+            "name": "Python Snake ROM",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["smb.nes"]
+            "args": ["nestest.nes", "--snake"]
         },
         {
             "name": "Python Test ROM",

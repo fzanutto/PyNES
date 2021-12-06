@@ -11,9 +11,9 @@ class ROM(MemoryOwner):
     memory_end_location = 0xFFFF
 
     def __init__(self, rom_bytes: bytes, is_test_rom: bool = False):
-        self.is_test_rom = is_test_rom
+        self.is_snake_rom = is_test_rom
 
-        if not self.is_test_rom:
+        if not self.is_snake_rom:
             self.header_size = 0x10  # 16 bytes
             self.rom_bytes = rom_bytes
 

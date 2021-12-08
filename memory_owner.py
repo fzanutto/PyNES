@@ -17,10 +17,7 @@ class MemoryOwner:
 
         value = self.get_memory()[initial_position: initial_position + size]
 
-        if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
-            value = b''.join(value)
-
-        return bytes(value)
+        return value
 
     def set(self, position: int, value: int, size: int = 1):
         """
@@ -28,6 +25,3 @@ class MemoryOwner:
         """
         for i in range(size):
             self.get_memory()[position - self.memory_start_location + i] = (value >> (8*i)) & 255
-
-    def set_byte(self, position: int, value: bytes):
-        self.get_memory()[position - self.memory_start_location] = value

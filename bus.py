@@ -44,18 +44,14 @@ class Bus:
         mem_owner = self.get_memory_owner(position)
 
         position = self.get_actual_location(mem_owner, position)
-
-        memory_start_location = mem_owner.memory_start_location
-        return mem_owner.get_memory()[position - memory_start_location]
+        return mem_owner.get(position)
 
     def read_memory_bytes(self, position: int, size: int = 1) -> bytes:
         mem_owner = self.get_memory_owner(position)
 
         position = self.get_actual_location(mem_owner, position)
 
-        initial_position = position - mem_owner.memory_start_location
-
-        value = mem_owner.get_memory()[initial_position: initial_position + size]
+        value = mem_owner.get_bytes(position, size)
 
         if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
             value = b''.join(value)
@@ -67,5 +63,4 @@ class Bus:
 
         position = self.get_actual_location(mem_owner, position)
 
-        for i in range(num_bytes):
-            mem_owner.get_memory()[position - mem_owner.memory_start_location + i] = (value >> (8*i)) & 255
+        mem_owner.set(position, value, num_bytes)

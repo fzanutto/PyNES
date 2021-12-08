@@ -135,11 +135,17 @@ class CPU:
 
             cur_time = time_ns()
 
+            if self.debug and cur_time - last_time > 0:
+                print('time for running instruction', cur_time - last_time, identifier_byte)
+
             last_time = cur_time
 
             self.callback()
 
             cur_time = time_ns()
+
+            if self.debug and cur_time - last_time > 0:
+                print('time for running ui', cur_time - last_time)
 
             last_time = cur_time
 

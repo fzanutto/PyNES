@@ -38,15 +38,10 @@ class LaxIndIdx(IndirectIndexedAddressing, Lax):
     identifier_byte = bytes([0xB3])
 
 
-class Sax(Instruction):
+class Sax(WritesToMem, Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
-
         return cpu.a_reg & cpu.x_reg
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class SaxZeroPage(ZeroPageAddressing, Sax):

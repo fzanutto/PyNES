@@ -1,6 +1,6 @@
 from typing import Optional
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
-from instructions.generic_instructions import Instruction
+from instructions.generic_instructions import Instruction, WritesToMem
 from status import Status
 
 
@@ -151,13 +151,9 @@ class CpxAbs(AbsoluteAddressing, Cpx):
     identifier_byte = bytes([0XEC])
 
 
-class Lsr(Instruction):
+class Lsr(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
     def lsr(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
@@ -200,7 +196,7 @@ class LsrAbsX(AbsoluteAddressingWithX, Lsr):
     identifier_byte = bytes([0x5E])
 
 
-class Asl(Instruction):
+class Asl(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -213,10 +209,6 @@ class Asl(Instruction):
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         value = cpu.bus.read_memory(memory_address)
         return cls.asl(cpu, value)
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        return cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class AslImpl(ImplicitAddressing, Asl):
@@ -248,7 +240,7 @@ class AslAbsX(AbsoluteAddressingWithX, Asl):
     identifier_byte = bytes([0x1E])
 
 
-class Ror(Instruction):
+class Ror(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -266,10 +258,6 @@ class Ror(Instruction):
         value = (value >> 1) | (current_carry << 7)
 
         return value
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class RorImpl(ImplicitAddressing, Ror):
@@ -301,7 +289,7 @@ class RorAbsX(AbsoluteAddressingWithX, Ror):
     identifier_byte = bytes([0x7E])
 
 
-class Rol(Instruction):
+class Rol(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -319,10 +307,6 @@ class Rol(Instruction):
         value = ((value << 1) | current_carry) & 255
 
         return value
-
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
 
 
 class RolImp(ImplicitAddressing, Rol):

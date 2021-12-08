@@ -1,6 +1,6 @@
 from typing import Optional
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
-from instructions.generic_instructions import Instruction
+from instructions.generic_instructions import Instruction, WritesToMem
 from status import Status
 
 
@@ -51,27 +51,32 @@ class SbcImm(ImmediateReadAddressing, Sbc):
         return super().sub_carry(cpu, memory_address, data_bytes, value)
 
 
-
 class SbcZeroPage(ZeroPageAddressing, Sbc):
     identifier_byte = bytes([0xE5])
+
 
 class SbcZeroPageX(ZeroPageAddressingWithX, Sbc):
     identifier_byte = bytes([0xF5])
 
+
 class SbcAbs(AbsoluteAddressing, Sbc):
     identifier_byte = bytes([0xED])
+
+
 class SbcAbsY(AbsoluteAddressingWithY, Sbc):
     identifier_byte = bytes([0xF9])
+
 
 class SbcAbsX(AbsoluteAddressingWithX, Sbc):
     identifier_byte = bytes([0xFD])
 
+
 class SbcIdxInd(IndexedIndirectAddressing, Sbc):
     identifier_byte = bytes([0xE1])
 
+
 class SbcIndIdx(IndirectIndexedAddressing, Sbc):
     identifier_byte = bytes([0xF1])
-
 
 
 class Adc(Instruction):
@@ -130,6 +135,7 @@ class AdcIndIdx(IndirectIndexedAddressing, Adc):
 class AdcZeroPage(ZeroPageAddressing, Adc):
     identifier_byte = bytes([0x65])
 
+
 class AdcZeroPageX(ZeroPageAddressingWithX, Adc):
     identifier_byte = bytes([0x75])
 
@@ -137,11 +143,14 @@ class AdcZeroPageX(ZeroPageAddressingWithX, Adc):
 class AdcAbs(AbsoluteAddressing, Adc):
     identifier_byte = bytes([0x6D])
 
+
 class AdcAbsY(AbsoluteAddressingWithY, Adc):
     identifier_byte = bytes([0x79])
 
+
 class AdcAbsX(AbsoluteAddressingWithX, Adc):
     identifier_byte = bytes([0x7D])
+
 
 class Iny(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0xC8])
@@ -203,7 +212,7 @@ class Dex(ImplicitAddressing, Instruction):
         cpu.x_reg = value
 
 
-class Inc(Instruction):
+class Inc(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -211,24 +220,24 @@ class Inc(Instruction):
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return (cpu.bus.read_memory(memory_address) + 1) % 256
 
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
-
 
 class IncZeroPage(ZeroPageAddressing, Inc):
     identifier_byte = bytes([0xE6])
 
+
 class IncZeroPageX(ZeroPageAddressingWithX, Inc):
     identifier_byte = bytes([0xF6])
+
 
 class IncAbs(AbsoluteAddressing, Inc):
     identifier_byte = bytes([0xEE])
 
+
 class IncAbsX(AbsoluteAddressingWithX, Inc):
     identifier_byte = bytes([0xFE])
 
-class Dec(Instruction):
+
+class Dec(WritesToMem, Instruction):
     sets_zero_bit = True
     sets_negative_bit = True
 
@@ -237,19 +246,18 @@ class Dec(Instruction):
         value = cpu.bus.read_memory(memory_address)
         return value - 1 if value > 0 else 255
 
-    @classmethod
-    def write(cls, cpu, memory_address, value):
-        cpu.bus.write_memory(memory_address, value, num_bytes=1)
-
 
 class DecZeroPage(ZeroPageAddressing, Dec):
     identifier_byte = bytes([0xC6])
 
+
 class DecZeroPageX(ZeroPageAddressingWithX, Dec):
     identifier_byte = bytes([0xD6])
 
+
 class DecAbs(AbsoluteAddressing, Dec):
     identifier_byte = bytes([0xCE])
+
 
 class DecAbsX(AbsoluteAddressingWithX, Dec):
     identifier_byte = bytes([0xDE])

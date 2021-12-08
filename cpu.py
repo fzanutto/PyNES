@@ -72,8 +72,7 @@ class CPU:
 
     def push_to_stack(self, value, size):
         for i in range(size):
-            self.bus.write_memory(0x0100 + self.sp_reg,
-                                  (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
+            self.bus.write_memory(0x0100 + self.sp_reg, (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
             self.sp_reg -= 1
 
     def pull_from_stack(self, size):
@@ -136,17 +135,11 @@ class CPU:
 
             cur_time = time_ns()
 
-            if self.debug and cur_time - last_time > 0:
-                print('time for running instruction', cur_time - last_time, identifier_byte)
-
             last_time = cur_time
 
             self.callback()
 
             cur_time = time_ns()
-
-            if self.debug and cur_time - last_time > 0:
-                print('time for running ui', cur_time - last_time)
 
             last_time = cur_time
 

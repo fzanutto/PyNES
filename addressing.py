@@ -14,13 +14,13 @@ class Addressing:
         return 0
 
 
-class XRegOffset(object):
+class XRegOffset:
     @classmethod
     def get_offset(cls, cpu):
         return cpu.x_reg
 
 
-class YRegOffset(object):
+class YRegOffset:
     @classmethod
     def get_offset(cls, cpu):
         return cpu.y_reg

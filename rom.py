@@ -21,10 +21,12 @@ class ROM(MemoryOwner):
             self.num_chr_rom_blocks = self.rom_bytes[5]
             # TODO flags 6, 7, 8, 9, 10
 
+            prg_start = self.header_size
+            prg_end = self.header_size + (16 * KB_SIZE * self.num_prg_blocks)
             # program data starts after header
             # and lasts for a set number of 16KB blocks
-            self.prg_bytes = rom_bytes[self.header_size:
-                                       self.header_size + (16 * KB_SIZE * self.num_prg_blocks)]
+            self.prg_bytes = rom_bytes[prg_start: prg_end]
+            self.chr_rom = rom_bytes[prg_end: prg_end + (8 * KB_SIZE * self.num_chr_rom_blocks)]
         else:
             self.header_size = 0
             self.rom_bytes = rom_bytes

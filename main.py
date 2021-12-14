@@ -54,6 +54,8 @@ def main():
 
     # create ppu
     ppu = PPU()
+    ppu.set_chr_rom(rom.chr_rom)
+    ppu.set_screen_mirroring(None) # TODO
 
     io_regs = IO_Registers()
 

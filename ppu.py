@@ -29,12 +29,13 @@ class PPU(MemoryOwner):
         self.addr_reg_pointer = 0
         self.internal_data_buf = 0
         self.chr_rom = []
+        self.mirror_mode = None  # 0: horizontal - 1: vertical
 
     def set_chr_rom(self, data):
         self.chr_rom = data
 
     def set_screen_mirroring(self, data):
-        pass
+        self.mirror_mode = data
 
     def set_control_reg(self, value):
         self.memory[0] = value
@@ -61,6 +62,21 @@ class PPU(MemoryOwner):
 
     def get_addr_reg(self):
         return self.addr_reg[0] << 8 | self.addr_reg[1]
+
+    def mirror_ram_addr(self, addr):
+        mirrored_ram = addr & '0b10111111111111'
+        ram_index = mirrored_ram - 0x2000
+        name_table = ram_index // 0x400
+        if self.mirror_mode == 0:  # horizontal
+            if name_table == 1 or name_table == 2:
+                return ram_index - 0x400
+            elif name_table == 3:
+                return ram_index - 0x800
+        elif self.mirror_mode == 1:  # vertical
+            if name_table == 2 or name_table == 3:
+                return ram_index - 0x800
+
+        return ram_index
 
     def read_data(self):
         addr = self.get_addr_reg()

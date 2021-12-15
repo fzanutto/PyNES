@@ -21,6 +21,8 @@ class ROM(MemoryOwner):
             self.num_chr_rom_blocks = self.rom_bytes[5]
             # TODO flags 6, 7, 8, 9, 10
 
+            self.flag_6 = self.rom_bytes[6]
+
             prg_start = self.header_size
             prg_end = self.header_size + (16 * KB_SIZE * self.num_prg_blocks)
             # program data starts after header

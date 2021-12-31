@@ -243,17 +243,33 @@ class AslImpl(ImplicitAddressing, Asl):
 class AslZeroPage(ZeroPageAddressing, Asl):
     identifier_byte = bytes([0x06])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class AslZeroPageX(ZeroPageAddressingWithX, Asl):
     identifier_byte = bytes([0x16])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class AslAbs(AbsoluteAddressing, Asl):
     identifier_byte = bytes([0x0E])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class AslAbsX(AbsoluteAddressingWithX, Asl):
     identifier_byte = bytes([0x1E])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class Ror(WritesToMem, Instruction):
@@ -292,17 +308,33 @@ class RorImpl(ImplicitAddressing, Ror):
 class RorZeroPage(ZeroPageAddressing, Ror):
     identifier_byte = bytes([0x66])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class RorZeroPageX(ZeroPageAddressingWithX, Ror):
     identifier_byte = bytes([0x76])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class RorAbs(AbsoluteAddressing, Ror):
     identifier_byte = bytes([0x6E])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class RorAbsX(AbsoluteAddressingWithX, Ror):
     identifier_byte = bytes([0x7E])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class Rol(WritesToMem, Instruction):
@@ -342,17 +374,33 @@ class RolImp(ImplicitAddressing, Rol):
 class RolZeroPage(ZeroPageAddressing, Rol):
     identifier_byte = bytes([0x26])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class RolZeroPageX(ZeroPageAddressingWithX, Rol):
     identifier_byte = bytes([0x36])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class RolAbs(AbsoluteAddressing, Rol):
     identifier_byte = bytes([0x2E])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class RolAbsX(AbsoluteAddressingWithX, Rol):
     identifier_byte = bytes([0x3E])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class Ora(Instruction):

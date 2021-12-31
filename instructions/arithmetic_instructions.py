@@ -224,17 +224,33 @@ class Inc(WritesToMem, Instruction):
 class IncZeroPage(ZeroPageAddressing, Inc):
     identifier_byte = bytes([0xE6])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class IncZeroPageX(ZeroPageAddressingWithX, Inc):
     identifier_byte = bytes([0xF6])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class IncAbs(AbsoluteAddressing, Inc):
     identifier_byte = bytes([0xEE])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class IncAbsX(AbsoluteAddressingWithX, Inc):
     identifier_byte = bytes([0xFE])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class Dec(WritesToMem, Instruction):
@@ -250,14 +266,30 @@ class Dec(WritesToMem, Instruction):
 class DecZeroPage(ZeroPageAddressing, Dec):
     identifier_byte = bytes([0xC6])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class DecZeroPageX(ZeroPageAddressingWithX, Dec):
     identifier_byte = bytes([0xD6])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class DecAbs(AbsoluteAddressing, Dec):
     identifier_byte = bytes([0xCE])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class DecAbsX(AbsoluteAddressingWithX, Dec):
     identifier_byte = bytes([0xDE])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7

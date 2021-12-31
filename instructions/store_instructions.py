@@ -4,32 +4,60 @@ from instructions.base_instructions import Sta, Stx, Sty
 
 
 # Store A
-class StaAbs(AbsoluteAddressing, Sta):
-    identifier_byte = bytes([0x8D])
-
 
 class StaZeroPage(ZeroPageAddressing, Sta):
     identifier_byte = bytes([0x85])
+
+    @classmethod
+    def get_cycles(cls):
+        return 3
 
 
 class StaZeroPageX(ZeroPageAddressingWithX, Sta):
     identifier_byte = bytes([0x95])
 
+    @classmethod
+    def get_cycles(cls):
+        return 4
+
+
+class StaAbs(AbsoluteAddressing, Sta):
+    identifier_byte = bytes([0x8D])
+
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 class StaAbsWithX(AbsoluteAddressingWithX, Sta):
     identifier_byte = bytes([0x9D])
+
+    @classmethod
+    def get_cycles(cls):
+        return 5
 
 
 class StaAbsWithY(AbsoluteAddressingWithY, Sta):
     identifier_byte = bytes([0x99])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class StaIndX(IndexedIndirectAddressing, Sta):
     identifier_byte = bytes([0x81])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class StaIndY(IndirectIndexedAddressing, Sta):
     identifier_byte = bytes([0x91])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 # Store X

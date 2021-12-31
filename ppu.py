@@ -13,29 +13,27 @@ class PPU(MemoryOwner):
     $2007 -> PPUDATA: PPU data register. Access: read, write
     '''
 
-    NAMETABLE1 = '0b00000001'
-    NAMETABLE2 = '0b00000010'
-    VRAM_ADD_INCREMENT = '0b00000100'
-    SPRITE_PATTERN_ADDR = '0b00001000'
-    BACKROUND_PATTERN_ADDR = '0b00010000'
-    SPRITE_SIZE = '0b00100000'
-    MASTER_SLAVE_SELECT = '0b01000000'
-    GENERATE_NMI = '0b10000000'
+    NAMETABLE1 = int('0b00000001', 2)
+    NAMETABLE2 = int('0b00000010', 2)
+    VRAM_ADD_INCREMENT = int('0b00000100', 2)
+    SPRITE_PATTERN_ADDR = int('0b00001000', 2)
+    BACKROUND_PATTERN_ADDR = int('0b00010000', 2)
+    SPRITE_SIZE = int('0b00100000', 2)
+    MASTER_SLAVE_SELECT = int('0b01000000', 2)
+    GENERATE_NMI = int('0b10000000', 2)
 
-    def __init__(self):
+    def __init__(self, chr_rom: bytes, screen_mirroring: int):
         super().__init__(0x2000, 0x3FFF)
+
+        self.chr_rom = chr_rom
+        self.palette_table = [0 * 32]
+        self.ram = [0 * 2048]
+        self.oam_data = [0 * 256]
 
         self.addr_reg = [0, 0]  # high, low
         self.addr_reg_pointer = 0
         self.internal_data_buf = 0
-        self.chr_rom = []
-        self.mirror_mode = None  # 0: horizontal - 1: vertical
-
-    def set_chr_rom(self, data):
-        self.chr_rom = data
-
-    def set_screen_mirroring(self, data):
-        self.mirror_mode = data
+        self.mirror_mode = screen_mirroring  # 0: horizontal - 1: vertical
 
     def set_control_reg(self, value):
         self.memory[0] = value
@@ -44,7 +42,7 @@ class PPU(MemoryOwner):
         return self.memory[0]
 
     def increment_ram_addr(self):
-        inc = 32 if self.get_control_reg() & self.VRAM_ADD_INCREMENT > 0 else 1
+        inc = 32 if (self.get_control_reg() & self.VRAM_ADD_INCREMENT) > 0 else 1
 
         low_addr = self.addr_reg[1]
         self.addr_reg[1] = (self.addr_reg[1] + inc) & 0xFF
@@ -61,10 +59,28 @@ class PPU(MemoryOwner):
         self.addr_reg[1] = value & 0xFF
 
     def get_addr_reg(self):
-        return self.addr_reg[0] << 8 | self.addr_reg[1]
+        return (self.addr_reg[0] << 8 | self.addr_reg[1]) & int('0b11111111111111', 2)
 
-    def mirror_ram_addr(self, addr):
-        mirrored_ram = addr & '0b10111111111111'
+
+    def write_to_data(self, value):
+        addr = self.get_addr_reg()
+
+        if addr <= 0x1fff:
+            raise Exception("attempt to write to chr rom space", addr)
+        elif addr <= 0x2fff:
+            self.ram[self.mirror_ram_addr(addr)] = value
+        elif addr <= 0x3eff:
+            raise Exception("addr {} shouldn't be used in reallity".format(addr))
+        elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
+            add_mirror = addr - 0x10
+            self.palette_table[add_mirror - 0x3f00] = value
+        else:
+            raise Exception("unexpected access to mirrored space {}".format(addr))
+        
+        self.increment_ram_addr()
+
+    def mirror_ram_addr(self, addr: int) -> int:
+        mirrored_ram = addr & int('0b10111111111111', 2)
         ram_index = mirrored_ram - 0x2000
         name_table = ram_index // 0x400
         if self.mirror_mode == 0:  # horizontal
@@ -91,19 +107,22 @@ class PPU(MemoryOwner):
         elif addr <= 0x3EFF:
             raise Exception("Addr not expected to be used")
         elif addr <= 0x3FFF:
-            result = self.pallete_table[addr - 0x3f00]
+            result = self.palette_table[addr - 0x3f00]
 
         return result
 
     def set(self, position: int, value: int, size: int = 1):
-
         if position == 0x2000:
             self.set_control_reg(value)
-        elif position == 0x2007:
+        elif position == 0x2006:
             self.addr_reg[self.addr_reg_pointer] = value
             self.addr_reg_pointer ^= 1
-
-        super().set(position, value, size)
+        elif position == 0x2007:
+            self.write_to_data(value)
+        elif 0x2008 <= position:
+            self.set(position & int('0b0010000000000111', 2), value, size)
+        else:
+            super().set(position, value, size)
 
     def get(self, position: int) -> int:
         if position in [0x2000, 0x2001, 0x2003, 0x2005, 0x2006, 0x4014]:
@@ -113,6 +132,6 @@ class PPU(MemoryOwner):
             return self.read_data()
 
         elif position >= 0x2008:
-            return self.get(position & '0b00100000_00000111')
+            return self.get(position & int('0b00100000_00000111', 2))
 
         return super().get(position)

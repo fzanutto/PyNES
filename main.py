@@ -53,9 +53,7 @@ def main():
     ram = RAM()
 
     # create ppu
-    ppu = PPU()
-    ppu.set_chr_rom(rom.chr_rom)
-    ppu.set_screen_mirroring(rom.flag_6 & 1)
+    ppu = PPU(rom.chr_rom, rom.flag_6 & 1)
 
     io_regs = IO_Registers()
 

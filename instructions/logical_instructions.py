@@ -183,17 +183,33 @@ class LsrImpl(ImplicitAddressing, Lsr):
 class LsrZeroPage(ZeroPageAddressing, Lsr):
     identifier_byte = bytes([0x46])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class LsrZeroPageX(ZeroPageAddressingWithX, Lsr):
     identifier_byte = bytes([0x56])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class LsrAbs(AbsoluteAddressing, Lsr):
     identifier_byte = bytes([0x4E])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class LsrAbsX(AbsoluteAddressingWithX, Lsr):
     identifier_byte = bytes([0x5E])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class Asl(WritesToMem, Instruction):

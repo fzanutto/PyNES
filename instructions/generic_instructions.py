@@ -7,6 +7,10 @@ class Instruction:
     sets_negative_bit = False
 
     @classmethod
+    def get_cycles(cls):
+        return 0
+
+    @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
         return None
 
@@ -25,7 +29,7 @@ class Instruction:
     @classmethod
     def execute(cls, cpu, data_bytes: bytes):
         memory_address = cls.get_address(cpu, data_bytes)
-
+        
         value = cls.get_data(cpu, memory_address, data_bytes)
 
         cls.write(cpu, memory_address, value)

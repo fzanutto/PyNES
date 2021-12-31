@@ -6,18 +6,31 @@ from status import Status
 
 class JmpAbs(AbsoluteAddressing, Jmp):
     identifier_byte = bytes([0x4C])
+    @classmethod
+    def get_cycles(cls):
+        return 3
 
 
 class JmpInd(IndirectAddressing, Jmp):
     identifier_byte = bytes([0x6C])
+    @classmethod
+    def get_cycles(cls):
+        return 5
 
 
 class JsrAbs(AbsoluteAddressing, Jsr):
     identifier_byte = bytes([0x20])
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class Rts(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x60])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
     @classmethod
     def write(cls, cpu, memory_address, value):
@@ -26,6 +39,10 @@ class Rts(ImplicitAddressing, Instruction):
 
 class Rti(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x40])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
     @classmethod
     def write(cls, cpu, memory_address, value):

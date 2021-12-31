@@ -8,10 +8,18 @@ from instructions.base_instructions import Ldx, Lda, Ldy
 # Load X
 class LdxImm(ImmediateReadAddressing, Ldx):
     identifier_byte = bytes([0xA2])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 2
 
 
 class LdxZeroPage(ZeroPageAddressing, Ldx):
     identifier_byte = bytes([0xA6])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 3
 
 
 class LdxZeroPageY(ZeroPageAddressingWithY, Ldx):
@@ -20,10 +28,18 @@ class LdxZeroPageY(ZeroPageAddressingWithY, Ldx):
 
 class LdxAbs(AbsoluteAddressing, Ldx):
     identifier_byte = bytes([0xAE])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class LdxAbsY(AbsoluteAddressingWithY, Ldx):
     identifier_byte = bytes([0xBE])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 # Load A
@@ -45,6 +61,10 @@ class LdaAbs(AbsoluteAddressing, Lda):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return cpu.bus.read_memory(memory_address)
+
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class LdaIndIdx(IndirectIndexedAddressing, Lda):

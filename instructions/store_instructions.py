@@ -35,10 +35,18 @@ class StaIndY(IndirectIndexedAddressing, Sta):
 # Store X
 class StxZeroPage(ZeroPageAddressing, Stx):
     identifier_byte = bytes([0x86])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 3
 
 
 class StxAbs(AbsoluteAddressing, Stx):
     identifier_byte = bytes([0x8E])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class StxZeroPageY(ZeroPageAddressingWithY, Stx):

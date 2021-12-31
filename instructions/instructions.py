@@ -1,12 +1,7 @@
 from addressing import *
-from instructions.base_instructions import SetBit, ClearBit, Nop
+from instructions.base_instructions import SetBit, ClearBit
 from instructions.generic_instructions import Instruction
 from status import Status
-
-
-# Nop
-class NopImp(ImplicitAddressing, Nop):
-    identifier_byte = bytes([0xEA])
 
 
 # set status instructions
@@ -87,3 +82,7 @@ class Brk(ImplicitAddressing, Instruction):
     def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[Status.StatusTypes.interrupt] = 1
         cpu.running = False
+
+    @classmethod
+    def get_cycles(cls):
+        return 7

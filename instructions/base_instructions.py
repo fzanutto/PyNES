@@ -22,19 +22,20 @@ class BranchSet(RelativeAddressing, Jmp):
     @classmethod
     def write(cls, cpu, memory_address, value):
         if cpu.status_reg.bits[cls.bit]:
+            cls.add_cycle_from_branch = 1
             super().write(cpu, memory_address, value)
+        else:
+            cls.add_cycle_from_branch = 0
 
 
 class BranchClear(RelativeAddressing, Jmp):
     @classmethod
     def write(cls, cpu, memory_address, value):
         if not cpu.status_reg.bits[cls.bit]:
+            cls.add_cycle_from_branch = 1
             super().write(cpu, memory_address, value)
-
-
-class Nop(Instruction):
-    pass
-
+        else:
+            cls.add_cycle_from_branch = 0
 
 class Ld(Instruction):
     sets_zero_bit = True

@@ -107,10 +107,18 @@ class DcpAbsY(AbsoluteAddressingWithY, Dcp):
 
 class DcpIdxInd(IndexedIndirectAddressing, Dcp):
     identifier_byte = bytes([0xC3])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class DcpIndIdx(IndirectIndexedAddressing, Dcp):
     identifier_byte = bytes([0xD3])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class Isb(Instruction):
@@ -172,10 +180,18 @@ class IsbAbsY(AbsoluteAddressingWithY, Isb):
 
 class IsbIdxInd(IndexedIndirectAddressing, Isb):
     identifier_byte = bytes([0xE3])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class IsbIndIdx(IndirectIndexedAddressing, Isb):
     identifier_byte = bytes([0xF3])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class Slo(Instruction):
@@ -223,10 +239,18 @@ class SloAbsoluteY(AbsoluteAddressingWithY, Slo):
 
 class SloIdxInd(IndexedIndirectAddressing, Slo):
     identifier_byte = bytes([0x03])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class SloIndIdx(IndirectIndexedAddressing, Slo):
     identifier_byte = bytes([0x13])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class Rla(Instruction):
@@ -279,10 +303,18 @@ class RlaAbsoluteY(AbsoluteAddressingWithY, Rla):
 
 class RlaIdxInd(IndexedIndirectAddressing, Rla):
     identifier_byte = bytes([0x23])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class RlaIndIdx(IndirectIndexedAddressing, Rla):
     identifier_byte = bytes([0x33])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class Sre(Instruction):
@@ -332,10 +364,18 @@ class SreAbsoluteY(AbsoluteAddressingWithY, Sre):
 
 class SreIdxInd(IndexedIndirectAddressing, Sre):
     identifier_byte = bytes([0x43])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class SreIndIdx(IndirectIndexedAddressing, Sre):
     identifier_byte = bytes([0x53])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class Rra(Instruction):
@@ -408,7 +448,15 @@ class RraAbsoluteY(AbsoluteAddressingWithY, Rra):
 
 class RraIdxInd(IndexedIndirectAddressing, Rra):
     identifier_byte = bytes([0x63])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8
 
 
 class RraIndIdx(IndirectIndexedAddressing, Rra):
     identifier_byte = bytes([0x73])
+    
+    @classmethod
+    def get_cycles(cls):
+        return 8

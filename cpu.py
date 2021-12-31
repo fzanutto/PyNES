@@ -21,6 +21,7 @@ class CPU:
         self.rom = None
         self.bus = bus
         self.debug = debug
+        self.cycle = 7 # TODO check it, starting in 7 cause nestes.log
         # status registers: store a single byte
         self.status_reg: Status = None
 
@@ -131,12 +132,15 @@ class CPU:
 
             value = instruction.execute(self, data_bytes)
 
+            self.cycle += instruction.get_cycles()
+
             self.status_reg.update(instruction, value)
 
             cur_time = time_ns()
 
             if self.debug and cur_time - last_time > 0:
-                print('time for running instruction', cur_time - last_time, identifier_byte)
+                pass
+                #print('time for running instruction', cur_time - last_time, identifier_byte)
 
             last_time = cur_time
 
@@ -145,13 +149,14 @@ class CPU:
             cur_time = time_ns()
 
             if self.debug and cur_time - last_time > 0:
-                print('time for running ui', cur_time - last_time)
+                pass
+                #print('time for running ui', cur_time - last_time)
 
             last_time = cur_time
 
     def debug_print(self, pc_reg: int, identifier_byte, data_bytes, instruction):
         # print out diagnostic information
-        # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0
+        # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0 CYC:
 
         registers_state = [
             hex(self.a_reg)[2:].upper(),
@@ -165,9 +170,10 @@ class CPU:
         rng = range(0, len(inst_bytes), 2)
         inst_hexes = [inst_bytes[i:i + 2] for i in rng]
 
-        print("{:0>4}  {:<8}  {:<31} A:{:0>2} X:{:0>2} Y:{:0>2} P:{:0>2} SP:{}".format(
+        print("{:0>4}  {:<8}  {:<31} A:{:0>2} X:{:0>2} Y:{:0>2} P:{:0>2} SP:{} CYC:{}".format(
             hex(pc_reg)[2:].upper(),
             ' '.join(inst_hexes),
             instruction.__name__[0:3].upper(),
-            *registers_state
+            *registers_state,
+            self.cycle
         ))

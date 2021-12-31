@@ -105,6 +105,10 @@ class Php(ImplicitAddressing, PushToStack):
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return cpu.status_reg.to_int() | (1 << 5) | (1 << 4)
 
+    @classmethod
+    def get_cycles(cls):
+        return 3
+
 
 class Pha(ImplicitAddressing, PushToStack):
     identifier_byte = bytes([0x48])
@@ -112,6 +116,10 @@ class Pha(ImplicitAddressing, PushToStack):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         return cpu.a_reg
+
+    @classmethod
+    def get_cycles(cls):
+        return 3
 
 
 class PullFromStack(Instruction):
@@ -131,6 +139,10 @@ class Pla(ImplicitAddressing, PullFromStack):
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
+    @classmethod
+    def get_cycles(cls):
+        return 4
+
 
 class Plp(ImplicitAddressing, PullFromStack):
     '''
@@ -145,3 +157,7 @@ class Plp(ImplicitAddressing, PullFromStack):
         bits_4_5 = current_value & ((1 << 5) | (1 << 4))
         remove_bits_4_5 = (~((1 << 5) | (1 << 4))) & 255
         cpu.status_reg.from_int((value & remove_bits_4_5) | bits_4_5)
+
+    @classmethod
+    def get_cycles(cls):
+        return 4

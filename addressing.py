@@ -4,6 +4,7 @@ import cpu as c
 
 class Addressing:
     data_length = 0
+    add_cycle_from_page_cross = 0
 
     @classmethod
     def get_instruction_length(cls):
@@ -11,6 +12,10 @@ class Addressing:
 
     @classmethod
     def get_offset(cls, cpu):
+        return 0
+
+    @classmethod
+    def get_cycles(cls):
         return 0
 
 
@@ -37,6 +42,10 @@ class ImplicitAddressing(Addressing):
     def get_address(cls, cpu, data_bytes) -> Optional[int]:
         return None
 
+    @classmethod
+    def get_cycles(cls):
+        return 2
+
 
 class ImmediateReadAddressing(Addressing):
     """
@@ -50,6 +59,10 @@ class ImmediateReadAddressing(Addressing):
     def get_data(cls, cpu, memory_address, data_bytes):
         return data_bytes[0]
 
+    @classmethod
+    def get_cycles(cls):
+        return 2
+
 
 class AbsoluteAddressing(Addressing):
     """
@@ -61,19 +74,37 @@ class AbsoluteAddressing(Addressing):
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
-        return (int.from_bytes(data_bytes, byteorder='little') + cls.get_offset(cpu)) & 0xFFFF
+        offset = cls.get_offset(cpu)
+        byte_addr = int.from_bytes(data_bytes, byteorder='little')
+        addr = byte_addr + offset
 
+        if ((byte_addr & 0xFF) + offset) > 0xFF:
+            cls.add_cycle_from_page_cross = 1
+        else:
+            cls.add_cycle_from_page_cross = 0
+
+        return addr & 0xFFFF
+
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 class AbsoluteAddressingWithX(XRegOffset, AbsoluteAddressing):
     """
     adds the x reg offset to an absolute memory location
     """
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class AbsoluteAddressingWithY(YRegOffset, AbsoluteAddressing):
     """
     adds the y reg offset to an absolute memory location
     """
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class ZeroPageAddressing(Addressing):
@@ -92,17 +123,27 @@ class ZeroPageAddressing(Addressing):
         # % 256 for overflow
         return address % 256
 
+    @classmethod
+    def get_cycles(cls):
+        return 3
+
 
 class ZeroPageAddressingWithX(XRegOffset, ZeroPageAddressing):
     """
     adds the x reg offset to an absolute memory address in the first 256 bytes
     """
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class ZeroPageAddressingWithY(YRegOffset, ZeroPageAddressing):
     """
     adds the x reg offset to an absolute memory address in the first 256 bytes
     """
+    @classmethod
+    def get_cycles(cls):
+        return 4
 
 
 class RelativeAddressing(Addressing):
@@ -110,9 +151,14 @@ class RelativeAddressing(Addressing):
     offset from current PC, can only jump 128 bytes in either direction
     """
     data_length = 1
+    add_cycle_from_branch = 0
 
     @classmethod
-    def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
+    def get_cycles(cls):
+        return 2 + cls.add_cycle_from_branch + cls.add_cycle_from_page_cross
+
+    @classmethod
+    def get_address(cls, cpu, data_bytes: bytes) -> int:
         # get the PC
         current_address = cpu.pc_reg
 
@@ -160,6 +206,9 @@ class IndexedIndirectAddressing(IndirectBase, ZeroPageAddressingWithX):
     """
     adds the x reg before indirection
     """
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
@@ -170,3 +219,7 @@ class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
     def get_address(cls, cpu: 'c.CPU', data_bytes):
         value = super().get_address(cpu, data_bytes) + cpu.y_reg
         return value & 0xFFFF
+    
+    @classmethod
+    def get_cycles(cls):
+        return 6

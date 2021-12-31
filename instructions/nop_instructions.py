@@ -4,6 +4,8 @@ from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, ImmediateRea
 from instructions.generic_instructions import Instruction
 
 # Implicit
+class NopImp(ImplicitAddressing, Instruction):
+    identifier_byte = bytes([0xEA])
 
 class Nop1A(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x1A])

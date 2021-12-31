@@ -10,7 +10,7 @@ while True:
     bytes = i[6:15]
     instruction_str = i[16:20]
     regs = i[48:68]
-    cycle = i[74:82]
+    cycle = i[74:]
 
     neslog_line = neslog_file.readline()
 
@@ -22,7 +22,7 @@ while True:
     v2 = bytes != neslog_line[6:15]
     v3 = instruction_str != neslog_line[16:20]
     v4 = regs != neslog_line[48:68]
-    v5 = cycle != neslog_line[86:94]
+    v5 = cycle != neslog_line[86:]
 
     if v1 or v2 or v3 or v4 or v5:
         print(ind, v1, v2, v3, v4, v5)

@@ -28,18 +28,10 @@ class LdxZeroPageY(ZeroPageAddressingWithY, Ldx):
 
 class LdxAbs(AbsoluteAddressing, Ldx):
     identifier_byte = bytes([0xAE])
-    
-    @classmethod
-    def get_cycles(cls):
-        return 4
 
 
 class LdxAbsY(AbsoluteAddressingWithY, Ldx):
     identifier_byte = bytes([0xBE])
-    
-    @classmethod
-    def get_cycles(cls):
-        return 4
 
 
 # Load A

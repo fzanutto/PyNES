@@ -149,7 +149,10 @@ class RelativeAddressing(Addressing):
 
     @classmethod
     def get_cycles(cls):
-        return 2 + cls.add_cycle_from_branch + cls.add_cycle_from_page_cross
+        value = 2
+        if cls.add_cycle_from_branch:
+            value += cls.add_cycle_from_branch + cls.add_cycle_from_page_cross
+        return value
 
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> int:
@@ -161,6 +164,11 @@ class RelativeAddressing(Addressing):
 
         if offset > 127:
             offset = offset - 256
+
+        if (current_address & 0xFF) + offset > 0xFF:
+            cls.add_cycle_from_page_cross = 1
+        else:
+            cls.add_cycle_from_page_cross = 0
 
         return current_address + offset
 

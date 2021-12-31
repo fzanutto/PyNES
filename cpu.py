@@ -132,25 +132,27 @@ class CPU:
 
             value = instruction.execute(self, data_bytes)
 
-            self.cycle += instruction.get_cycles()
+            instr_cycles = instruction.get_cycles()
+
+            self.cycle += instr_cycles
 
             self.status_reg.update(instruction, value)
 
             cur_time = time_ns()
 
             if self.debug and cur_time - last_time > 0:
-                pass
-                #print('time for running instruction', cur_time - last_time, identifier_byte)
+                print('time for running instruction', cur_time - last_time, identifier_byte)
 
             last_time = cur_time
+
+            self.bus.tick(instr_cycles)
 
             self.callback()
 
             cur_time = time_ns()
 
             if self.debug and cur_time - last_time > 0:
-                pass
-                #print('time for running ui', cur_time - last_time)
+                print('time for running ui', cur_time - last_time)
 
             last_time = cur_time
 

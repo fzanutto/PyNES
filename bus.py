@@ -11,6 +11,7 @@ class Bus:
         self.ppu = ppu
         self.io_regs = io_regs
         self.rom = rom
+        self.cycles = 0
 
         self.memory_owners: list[MemoryOwner] = [
             self.ram,
@@ -64,3 +65,7 @@ class Bus:
         position = self.get_actual_location(mem_owner, position)
 
         mem_owner.set(position, value, num_bytes)
+
+    def tick(self, cycles: int):
+        self.cycles += cycles
+        self.ppu.tick(cycles * 3)

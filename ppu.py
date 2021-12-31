@@ -35,6 +35,12 @@ class PPU(MemoryOwner):
         self.internal_data_buf = 0
         self.mirror_mode = screen_mirroring  # 0: horizontal - 1: vertical
 
+        self.cycles = 0
+        self.scanline = 0
+
+    def get_vblank_nmi(self) -> bool:
+        return self.get_control_reg() & self.GENERATE_NMI
+
     def set_control_reg(self, value):
         self.memory[0] = value
 
@@ -135,3 +141,23 @@ class PPU(MemoryOwner):
             return self.get(position & int('0b00100000_00000111', 2))
 
         return super().get(position)
+
+    def tick(self, cycles: int):
+        self.cycles += cycles
+
+        if self.cycles >= 341:
+            self.cycles %= 341
+
+            self.scanline += 1
+
+            if self.scanline == 241:
+                if self.get_vblank_nmi:
+                    # TODO: set vblank status reg
+                    # TODO: trigger nmi cpu interrupt
+                    pass
+
+            elif self.scanline >= 262:
+                self.scanline = 0
+                # TODO: reset vblack from status reg
+
+        

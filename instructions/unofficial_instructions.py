@@ -88,21 +88,41 @@ class Dcp(WritesToMem, Instruction):
 class DcpZeroPage(ZeroPageAddressing, Dcp):
     identifier_byte = bytes([0xC7])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class DcpZeroPageX(ZeroPageAddressingWithX, Dcp):
     identifier_byte = bytes([0xD7])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class DcpAbs(AbsoluteAddressing, Dcp):
     identifier_byte = bytes([0xCF])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class DcpAbsX(AbsoluteAddressingWithX, Dcp):
     identifier_byte = bytes([0xDF])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class DcpAbsY(AbsoluteAddressingWithY, Dcp):
     identifier_byte = bytes([0xDB])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class DcpIdxInd(IndexedIndirectAddressing, Dcp):
@@ -161,21 +181,41 @@ class Isb(Instruction):
 class IsbZeroPage(ZeroPageAddressing, Isb):
     identifier_byte = bytes([0xE7])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class IsbZeroPageX(ZeroPageAddressingWithX, Isb):
     identifier_byte = bytes([0xF7])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class IsbAbs(AbsoluteAddressing, Isb):
     identifier_byte = bytes([0xEF])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class IsbAbsX(AbsoluteAddressingWithX, Isb):
     identifier_byte = bytes([0xFF])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class IsbAbsY(AbsoluteAddressingWithY, Isb):
     identifier_byte = bytes([0xFB])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class IsbIdxInd(IndexedIndirectAddressing, Isb):
@@ -191,7 +231,7 @@ class IsbIndIdx(IndirectIndexedAddressing, Isb):
     
     @classmethod
     def get_cycles(cls):
-        return 4
+        return 8
 
 
 class Slo(Instruction):
@@ -220,21 +260,41 @@ class Slo(Instruction):
 class SloZeroPage(ZeroPageAddressing, Slo):
     identifier_byte = bytes([0x07])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class SloZeroPageX(ZeroPageAddressingWithX, Slo):
     identifier_byte = bytes([0x17])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class SloAbsolute(AbsoluteAddressing, Slo):
     identifier_byte = bytes([0x0F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class SloAbsoluteX(AbsoluteAddressingWithX, Slo):
     identifier_byte = bytes([0x1F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class SloAbsoluteY(AbsoluteAddressingWithY, Slo):
     identifier_byte = bytes([0x1B])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class SloIdxInd(IndexedIndirectAddressing, Slo):
@@ -284,21 +344,41 @@ class Rla(Instruction):
 class RlaZeroPage(ZeroPageAddressing, Rla):
     identifier_byte = bytes([0x27])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class RlaZeroPageX(ZeroPageAddressingWithX, Rla):
     identifier_byte = bytes([0x37])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class RlaAbsolute(AbsoluteAddressing, Rla):
     identifier_byte = bytes([0x2F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class RlaAbsoluteX(AbsoluteAddressingWithX, Rla):
     identifier_byte = bytes([0x3F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class RlaAbsoluteY(AbsoluteAddressingWithY, Rla):
     identifier_byte = bytes([0x3B])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class RlaIdxInd(IndexedIndirectAddressing, Rla):
@@ -345,21 +425,41 @@ class Sre(Instruction):
 class SreZeroPage(ZeroPageAddressing, Sre):
     identifier_byte = bytes([0x47])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class SreZeroPageX(ZeroPageAddressingWithX, Sre):
     identifier_byte = bytes([0x57])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class SreAbsolute(AbsoluteAddressing, Sre):
     identifier_byte = bytes([0x4F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class SreAbsoluteX(AbsoluteAddressingWithX, Sre):
     identifier_byte = bytes([0x5F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class SreAbsoluteY(AbsoluteAddressingWithY, Sre):
     identifier_byte = bytes([0x5B])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class SreIdxInd(IndexedIndirectAddressing, Sre):
@@ -429,21 +529,41 @@ class Rra(Instruction):
 class RraZeroPage(ZeroPageAddressing, Rra):
     identifier_byte = bytes([0x67])
 
+    @classmethod
+    def get_cycles(cls):
+        return 5
+
 
 class RraZeroPageX(ZeroPageAddressingWithX, Rra):
     identifier_byte = bytes([0x77])
+
+    @classmethod
+    def get_cycles(cls):
+        return 6
 
 
 class RraAbsolute(AbsoluteAddressing, Rra):
     identifier_byte = bytes([0x6F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 6
+
 
 class RraAbsoluteX(AbsoluteAddressingWithX, Rra):
     identifier_byte = bytes([0x7F])
 
+    @classmethod
+    def get_cycles(cls):
+        return 7
+
 
 class RraAbsoluteY(AbsoluteAddressingWithY, Rra):
     identifier_byte = bytes([0x7B])
+
+    @classmethod
+    def get_cycles(cls):
+        return 7
 
 
 class RraIdxInd(IndexedIndirectAddressing, Rra):

@@ -60,20 +60,15 @@ def main():
 
 
     frame = Frame()
-    def callback():
-        #print('callback')
-        #ppu.render(frame)
-        #ui.handle_and_update_ui()
-        pass
 
-    bus = Bus(ram, ppu, io_regs, rom, callback)
+    bus = Bus(ram, ppu, io_regs, rom)
 
     # create cpu
     cpu = CPU(bus, args.debug)
     
-    ui = UI(cpu, frame)
+    ui = UI(cpu, rom.chr_rom, frame)
 
-    cpu.start_up()
+    cpu.start_up(ui.handle_and_update_ui)
     cpu.run_rom(rom)
 
 

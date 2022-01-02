@@ -110,6 +110,23 @@ class CPU:
         last_time = time_ns()
         while self.running:
             i += 1
+
+            if self.bus.get_nmi_status():
+                self.push_to_stack(self.pc, 2)
+
+                status_reg_copy = self.status_reg.copy()
+                status_reg_copy.bits[Status.StatusTypes.break1] = 0
+                status_reg_copy.bits[Status.StatusTypes.break2] = 1
+
+                self.push_to_stack(status_reg_copy.to_int(), 1)
+
+                self.status_reg.bits[Status.StatusTypes.interrupt] = 1
+
+                self.bus.tick(2)
+                self.pc = self.bus.read_memory(0xFFFA)
+
+                continue
+
             # get the current byte at pc
             identifier_byte = self.bus.read_memory(self.pc_reg)
 

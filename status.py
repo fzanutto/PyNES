@@ -28,8 +28,8 @@ class Status:
         zero = 1  # Z
         interrupt = 2  # I
         decimal = 3  # D
-        unused1 = 4
-        unused2 = 5
+        break1 = 4
+        break2 = 5
         overflow = 6  # V
         negative = 7  # N
 
@@ -39,8 +39,8 @@ class Status:
             (Status.StatusTypes.zero, False),
             (Status.StatusTypes.interrupt, True),
             (Status.StatusTypes.decimal, False),
-            (Status.StatusTypes.unused1, False),
-            (Status.StatusTypes.unused2, True),
+            (Status.StatusTypes.break1, False),
+            (Status.StatusTypes.break2, True),
             (Status.StatusTypes.overflow, False),
             (Status.StatusTypes.negative, False),
         ])
@@ -63,3 +63,8 @@ class Status:
     def from_int(self, value: int):
         for i in self.bits:
             self.bits[i] = (value & (1 << i.value)) > 0
+
+    def copy(self):
+        status = Status()
+        status.from_int(self.to_int())
+        return status

@@ -1,11 +1,12 @@
 import argparse
 from bus import Bus
 from cpu import CPU
+from frame import Frame
 from io_registers import IO_Registers
 from ram import RAM
 from ppu.ppu import PPU
 from rom import ROM
-
+from ui import UI
 
 def main():
     # set up command line argument parser
@@ -57,20 +58,22 @@ def main():
 
     io_regs = IO_Registers()
 
-    bus = Bus(ram, ppu, io_regs, rom)
+
+    frame = Frame()
+    def callback():
+        #print('callback')
+        #ppu.render(frame)
+        #ui.handle_and_update_ui()
+        pass
+
+    bus = Bus(ram, ppu, io_regs, rom, callback)
 
     # create cpu
     cpu = CPU(bus, args.debug)
+    
+    ui = UI(cpu, frame)
 
-    if args.snake:
-        from ui import UI
-        ui = UI(cpu)
-        cpu.start_up(ui.handle_and_update_ui)
-    else:
-        def dummy():
-            pass
-        cpu.start_up(dummy)
-
+    cpu.start_up()
     cpu.run_rom(rom)
 
 

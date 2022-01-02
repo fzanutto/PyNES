@@ -69,3 +69,5 @@ class Bus:
     def tick(self, cycles: int):
         self.cycles += cycles
         self.ppu.tick(cycles * 3)
+    def get_nmi_status(self):
+        return self.ppu.nmi_interrupt

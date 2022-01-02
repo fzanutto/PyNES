@@ -1,4 +1,6 @@
 from memory_owner import MemoryOwner
+from ppu.control_reg import ControlReg
+from ppu.status_reg import StatusReg
 
 
 class PPU(MemoryOwner):
@@ -13,15 +15,6 @@ class PPU(MemoryOwner):
     $2007 -> PPUDATA: PPU data register. Access: read, write
     '''
 
-    NAMETABLE1 = int('0b00000001', 2)
-    NAMETABLE2 = int('0b00000010', 2)
-    VRAM_ADD_INCREMENT = int('0b00000100', 2)
-    SPRITE_PATTERN_ADDR = int('0b00001000', 2)
-    BACKROUND_PATTERN_ADDR = int('0b00010000', 2)
-    SPRITE_SIZE = int('0b00100000', 2)
-    MASTER_SLAVE_SELECT = int('0b01000000', 2)
-    GENERATE_NMI = int('0b10000000', 2)
-
     def __init__(self, chr_rom: bytes, screen_mirroring: int):
         super().__init__(0x2000, 0x3FFF)
 
@@ -34,21 +27,14 @@ class PPU(MemoryOwner):
         self.addr_reg_pointer = 0
         self.internal_data_buf = 0
         self.mirror_mode = screen_mirroring  # 0: horizontal - 1: vertical
+        self.control_reg = ControlReg()
+        self.status_reg = StatusReg()
 
         self.cycles = 0
         self.scanline = 0
 
-    def get_vblank_nmi(self) -> bool:
-        return self.get_control_reg() & self.GENERATE_NMI
-
-    def set_control_reg(self, value):
-        self.memory[0] = value
-
-    def get_control_reg(self):
-        return self.memory[0]
-
     def increment_ram_addr(self):
-        inc = 32 if (self.get_control_reg() & self.VRAM_ADD_INCREMENT) > 0 else 1
+        inc = 32 if (self.control_reg.bits[ControlReg.StatusTypes.ram_increment]) > 0 else 1
 
         low_addr = self.addr_reg[1]
         self.addr_reg[1] = (self.addr_reg[1] + inc) & 0xFF
@@ -119,7 +105,7 @@ class PPU(MemoryOwner):
 
     def set(self, position: int, value: int, size: int = 1):
         if position == 0x2000:
-            self.set_control_reg(value)
+            self.control_reg.from_int(value)
         elif position == 0x2006:
             self.addr_reg[self.addr_reg_pointer] = value
             self.addr_reg_pointer ^= 1
@@ -151,13 +137,13 @@ class PPU(MemoryOwner):
             self.scanline += 1
 
             if self.scanline == 241:
-                if self.get_vblank_nmi:
-                    # TODO: set vblank status reg
+                if self.control_reg.bits[ControlReg.StatusTypes.vblank]:
+                    self.status_reg.bits[StatusReg.StatusTypes.vblank] = 1
                     # TODO: trigger nmi cpu interrupt
-                    pass
 
             elif self.scanline >= 262:
                 self.scanline = 0
-                # TODO: reset vblack from status reg
+                self.status_reg.bits[StatusReg.StatusTypes.vblank] = 0
+                
 
         

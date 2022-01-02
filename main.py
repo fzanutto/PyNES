@@ -3,7 +3,7 @@ from bus import Bus
 from cpu import CPU
 from io_registers import IO_Registers
 from ram import RAM
-from ppu import PPU
+from ppu.ppu import PPU
 from rom import ROM
 
 

@@ -1,6 +1,6 @@
 from io_registers import IO_Registers
 from memory_owner import MemoryOwner
-from ppu import PPU
+from ppu.ppu import PPU
 from ram import RAM
 from rom import ROM
 

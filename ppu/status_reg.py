@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from enum import Enum
 
-\class StatusReg:
+class StatusReg:
     """
     7  bit  0
     ---- ----

@@ -13,6 +13,7 @@ Recordings of all streams are available on [YouTube](https://www.youtube.com/cha
 - [Online 6502 assembler](https://skilldrick.github.io/easy6502/)
 - [6502 Wikipedia page](https://en.wikipedia.org/wiki/MOS_Technology_6502)
 - [Nice instruction set page](https://masswerk.at/6502/6502_instruction_set.html)
+- [Writing NES Emulator in Rust](https://bugzmanov.github.io/nes_ebook/)
 
 
 

@@ -112,7 +112,7 @@ class CPU:
             i += 1
 
             if self.bus.get_nmi_status():
-                self.push_to_stack(self.pc, 2)
+                self.push_to_stack(self.pc_reg, 2)
 
                 status_reg_copy = self.status_reg.copy()
                 status_reg_copy.bits[Status.StatusTypes.break1] = 0
@@ -123,8 +123,11 @@ class CPU:
                 self.status_reg.bits[Status.StatusTypes.interrupt] = 1
 
                 self.bus.tick(2)
-                self.pc = self.bus.read_memory(0xFFFA)
-
+                # TODO: find out where FFFA should be stored at, maybe RAM?
+                self.pc_reg = self.bus.read_memory(0xFFFA)
+                print('-------------')
+                print(self.pc_reg)
+                print('-------------')
                 continue
 
             # get the current byte at pc

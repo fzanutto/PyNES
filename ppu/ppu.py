@@ -95,9 +95,10 @@ class PPU(MemoryOwner):
         self.increment_ram_addr()
 
     def mirror_ram_addr(self, addr: int) -> int:
-        mirrored_ram = addr & int('0b10111111111111', 2)
+        mirrored_ram = addr & int('0b10111111111111', 2) # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
         ram_index = mirrored_ram - 0x2000
         name_table = ram_index // 0x400
+
         if self.mirror_mode == 0:  # horizontal
             if name_table == 1 or name_table == 2:
                 return ram_index - 0x400

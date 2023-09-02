@@ -44,8 +44,8 @@ class Bus:
     def read_memory(self, position: int):
         mem_owner = self.get_memory_owner(position)
 
-        position = self.get_actual_location(mem_owner, position)
-        return mem_owner.get(position)
+        actual_position = self.get_actual_location(mem_owner, position)
+        return mem_owner.get(actual_position)
 
     def read_memory_bytes(self, position: int, size: int = 1) -> bytes:
         mem_owner = self.get_memory_owner(position)
@@ -69,5 +69,6 @@ class Bus:
     def tick(self, cycles: int):
         self.cycles += cycles
         self.ppu.tick(cycles * 3)
+
     def get_nmi_status(self):
         return self.ppu.nmi_interrupt

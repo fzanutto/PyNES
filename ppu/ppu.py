@@ -187,8 +187,8 @@ class PPU(MemoryOwner):
             self.scanline += 1
 
             if self.scanline == 241:
+                self.status_reg.bits[StatusReg.StatusTypes.vblank] = 1
                 if self.control_reg.bits[ControlReg.StatusTypes.vblank]:
-                    self.status_reg.bits[StatusReg.StatusTypes.vblank] = 1
                     self.nmi_interrupt = True
 
             elif self.scanline >= 262:

@@ -36,9 +36,9 @@ class PPU(MemoryOwner):
         super().__init__(0x2000, 0x3FFF)
 
         self.chr_rom = chr_rom
-        self.palette_table = [0 * 32]
-        self.ram = [0 * 2048]
-        self.oam_data = [0 * 256]
+        self.palette_table = [0] * 32
+        self.ram = [0] * 2048
+        self.oam_data = [0] * 256
 
         self.addr_reg = [0, 0]  # high, low
         self.addr_reg_pointer = 0

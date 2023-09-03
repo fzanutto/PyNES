@@ -57,7 +57,7 @@ class ROM(MemoryOwner):
         if self.num_prg_blocks == 1:
             initial_position %= 0x4000
 
-        return self.get_memory()[initial_position: initial_position + size]
+        return int.from_bytes(self.get_memory()[initial_position: initial_position + size], byteorder='little')
 
     def get_bytes(self, position: int, size: int = 1):
         initial_position = position - self.memory_start_location

@@ -75,26 +75,6 @@ class PPU(MemoryOwner):
     def get_scroll_reg(self, value):
         return (self.scroll_reg[0] << 8 | self.scroll_reg[1]) & int('0b11111111111111', 2)
 
-    def write_to_data(self, value):
-        addr = self.get_addr_reg()
-
-        if addr <= 0x1fff:
-            raise Exception("attempt to write to chr rom space", addr)
-        elif addr <= 0x2fff:
-            self.ram[self.mirror_ram_addr(addr)] = value
-        elif addr <= 0x3eff:
-            raise Exception("addr {} shouldn't be used in reallity".format(addr))
-        elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
-            add_mirror = addr - 0x10
-            self.palette_table[addr - 0x3f00] = value
-            self.palette_table[add_mirror - 0x3f00] = value
-        elif addr <= 0x3f1f:
-            self.palette_table[addr - 0x3f00] = value
-        else:
-            raise Exception("unexpected access to address {}".format(addr))
-        
-        self.increment_ram_addr()
-
     def mirror_ram_addr(self, addr: int) -> int:
         mirrored_ram = addr & int('0b10111111111111', 2) # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
         ram_index = mirrored_ram - 0x2000
@@ -110,6 +90,24 @@ class PPU(MemoryOwner):
                 return ram_index - 0x800
 
         return ram_index
+    
+    def write_to_data(self, value):
+        addr = self.get_addr_reg()
+
+        if addr <= 0x1fff:
+            raise Exception("attempt to write to chr rom space", addr)
+        elif addr <= 0x3eff:
+            self.ram[self.mirror_ram_addr(addr)] = value
+        elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
+            add_mirror = addr - 0x10
+            self.palette_table[addr - 0x3f00] = value
+            self.palette_table[add_mirror - 0x3f00] = value
+        elif addr <= 0x3fff:
+            self.palette_table[(addr - 0x3f00) % 0x20] = value
+        else:
+            raise Exception("unexpected access to address {}".format(addr))
+        
+        self.increment_ram_addr()
 
     def read_data(self):
         addr = self.get_addr_reg()
@@ -127,7 +125,7 @@ class PPU(MemoryOwner):
             add_mirror = addr - 0x10
             result = self.palette_table[add_mirror - 0x3f00]
         elif addr <= 0x3FFF:
-            result = self.palette_table[addr - 0x3f00]
+            result = self.palette_table[(addr - 0x3f00) % 0x20]
 
         return result
 
@@ -189,10 +187,7 @@ class PPU(MemoryOwner):
             
             if self.scanline == 241:
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 1
-                if self.control_reg.bits[PPUControlReg.StatusTypes.vblank]:
-                    self.nmi_interrupt = True
-                else:
-                    print("PPU control reg vblank is false")
+                self.nmi_interrupt = self.control_reg.bits[PPUControlReg.StatusTypes.vblank]
 
             elif self.scanline >= 262:
                 self.scanline = 0
@@ -200,6 +195,30 @@ class PPU(MemoryOwner):
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 0
                 self.nmi_interrupt = False
                 
+    def get_background_pallete(self, column: int, row: int):
+        table_index = row // 4 * 8 + column // 4
+        byte = self.ram[0x03c0 + table_index]
+
+        tile_column = (column % 4) // 2
+        tile_row = (row % 4) // 2
+
+        pallete_index = 0
+        if tile_column == 0 and tile_row == 0:
+            pallete_index = byte & 0b11
+        elif tile_column == 1 and tile_row == 0:
+            pallete_index = (byte >> 2) & 0b11
+        elif tile_column == 0 and tile_row == 1:
+            pallete_index = (byte >> 4) & 0b11
+        elif tile_column == 1 and tile_row == 1:
+            pallete_index = (byte >> 6) & 0b11
+
+        pallete_start = 1 + pallete_index * 4
+        return [
+            self.palette_table[0],
+            self.palette_table[pallete_start],
+            self.palette_table[pallete_start + 1],
+            self.palette_table[pallete_start + 2]
+        ]
 
     def render(self, frame: Frame):
         bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
@@ -207,28 +226,31 @@ class PPU(MemoryOwner):
         for i in range(0x03C0):
             tile = self.ram[i]
             
-            tile_x = i % 32
-            tile_y = i // 32
+            tile_column = i % 32
+            tile_row = i // 32
 
             start_position = (0x1000 if bank else 0) + tile * 16
             tile = self.chr_rom[start_position: start_position + 16]
 
+            pallete_indexes = self.get_background_pallete(tile_column, tile_row)
+
             for y in range(8):
                 upper = tile[y]
                 lower = tile[y + 8]
+
                 for x in range(7, -1, -1):
-                    value = ((1 & upper) << 1) | (1 & lower)
+                    value = ((1 & lower) << 1) | (1 & upper)
                     upper = upper >> 1
                     lower = lower >> 1
 
                     rgb = (0,0,0)
                     if value == 0:
-                        rgb = PPU.SYSTEM_PALLETE[0x01]
+                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[0]]
                     elif value == 1:
-                        rgb = PPU.SYSTEM_PALLETE[0x23]
+                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[1]]
                     elif value == 2:
-                        rgb = PPU.SYSTEM_PALLETE[0x27]
+                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[2]]
                     elif value == 3:
-                        rgb = PPU.SYSTEM_PALLETE[0x30]
+                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[3]]
 
-                    frame.set_pixel(tile_x * 8 + x,tile_y * 8 + y, rgb)
+                    frame.set_pixel(tile_column * 8 + x,tile_row * 8 + y, rgb)

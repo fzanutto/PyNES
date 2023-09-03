@@ -54,6 +54,11 @@ class PPU(MemoryOwner):
         self.scanline = 0
         self.nmi_interrupt = False
 
+    def get_and_update_nmi(self):
+        cur_value = self.nmi_interrupt
+        self.nmi_interrupt = False
+        return cur_value
+
     def increment_ram_addr(self):
         inc = 32 if (self.control_reg.bits[ControlReg.StatusTypes.ram_increment]) > 0 else 1
 

@@ -24,10 +24,6 @@ class Bus:
         if type(mem_owner) is RAM:
             location &= ((1 << 11) - 1)
 
-        elif type(mem_owner) is ROM:
-            while location >= 0xC000:
-                location -= 0x4000
-
         return location
 
     def get_memory_owner(self, location: int):
@@ -50,9 +46,9 @@ class Bus:
     def read_memory_bytes(self, position: int, size: int = 1) -> bytes:
         mem_owner = self.get_memory_owner(position)
 
-        position = self.get_actual_location(mem_owner, position)
+        actual_position = self.get_actual_location(mem_owner, position)
 
-        value = mem_owner.get_bytes(position, size)
+        value = mem_owner.get_bytes(actual_position, size)
 
         if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
             value = b''.join(value)

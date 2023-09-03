@@ -19,14 +19,26 @@ class ROM(MemoryOwner):
 
             self.num_prg_blocks = self.rom_bytes[4]
             self.num_chr_rom_blocks = self.rom_bytes[5]
-            # TODO flags 6, 7, 8, 9, 10
 
-            self.flag_6 = self.rom_bytes[6]
+            control_byte_1 = self.rom_bytes[6]
+            self.screen_mirroring = control_byte_1 & 1
+            self.battery_ram = control_byte_1 & 0b10
+            self.contains_trainer = control_byte_1 & 0b100
+            self.four_screen_layout = control_byte_1 & 0b1000
 
-            prg_start = self.header_size
-            prg_end = self.header_size + (16 * KB_SIZE * self.num_prg_blocks)
-            # program data starts after header
-            # and lasts for a set number of 16KB blocks
+            control_byte_2 = self.rom_bytes[7]
+            # bits 0 and 1 should be 0 for ines 1.0
+            self.ines_version = control_byte_2 & 0b1100
+
+            if self.ines_version != 0:
+                raise Exception("iNES version not supported yet")
+
+            # control byte 1 container 4 lower bits and control byte 2 contain 4 upper bits of mapper type
+            self.rom_mapper_type = (control_byte_2 & 0b1111_0000) | (control_byte_1 >> 4)
+
+            prg_start = self.header_size + (0 if not self.contains_trainer else 512)
+            prg_end = prg_start + (16 * KB_SIZE * self.num_prg_blocks)
+
             self.prg_bytes = rom_bytes[prg_start: prg_end]
             self.chr_rom = rom_bytes[prg_end: prg_end + (8 * KB_SIZE * self.num_chr_rom_blocks)]
         else:
@@ -36,10 +48,10 @@ class ROM(MemoryOwner):
             self.num_prg_blocks = 1
             self.num_chr_rom_blocks = 1
 
-    def get_memory(self) -> List[bytes]:
+    def get_memory(self):
         return self.prg_bytes
 
-    def get(self, position: int, size: int = 1) -> bytes:
+    def get(self, position: int, size: int = 1):
         initial_position = position - self.memory_start_location
 
         if self.num_prg_blocks == 1:

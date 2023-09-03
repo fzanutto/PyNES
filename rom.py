@@ -40,21 +40,19 @@ class ROM(MemoryOwner):
         return self.prg_bytes
 
     def get(self, position: int, size: int = 1) -> bytes:
-        """
-        gets bytes at given position, could be multiple bytes
-        memory is duplicated around 0xC000
-        """
-        while position >= 0xC000:
-            position -= 0x4000
-
         initial_position = position - self.memory_start_location
+
+        if self.num_prg_blocks == 1:
+            initial_position %= 0x4000
+
         return self.get_memory()[initial_position: initial_position + size]
 
     def get_bytes(self, position: int, size: int = 1):
-        while position >= 0xC000:
-            position -= 0x4000
-
         initial_position = position - self.memory_start_location
+
+        if self.num_prg_blocks == 1:
+            initial_position %= 0x4000
+
         return bytes(self.get_memory()[initial_position: initial_position + size])
 
     def set(self, position: int, value: int):

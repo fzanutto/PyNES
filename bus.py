@@ -24,10 +24,6 @@ class Bus:
         if type(mem_owner) is RAM:
             location &= ((1 << 11) - 1)
 
-        elif type(mem_owner) is ROM:
-            while location >= 0xC000:
-                location -= 0x4000
-
         return location
 
     def get_memory_owner(self, location: int):

@@ -93,9 +93,12 @@ class PPU(MemoryOwner):
             raise Exception("addr {} shouldn't be used in reallity".format(addr))
         elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
             add_mirror = addr - 0x10
+            self.palette_table[addr - 0x3f00] = value
             self.palette_table[add_mirror - 0x3f00] = value
+        elif addr <= 0x3f1f:
+            self.palette_table[addr - 0x3f00] = value
         else:
-            raise Exception("unexpected access to mirrored space {}".format(addr))
+            raise Exception("unexpected access to address {}".format(addr))
         
         self.increment_ram_addr()
 

@@ -39,7 +39,7 @@ class PPUStatusReg:
         self.bits = OrderedDict([
             (PPUStatusReg.StatusTypes.unused0, False),
             (PPUStatusReg.StatusTypes.unused1, False),
-            (PPUStatusReg.StatusTypes.unused2, True),
+            (PPUStatusReg.StatusTypes.unused2, False),
             (PPUStatusReg.StatusTypes.unused3, False),
             (PPUStatusReg.StatusTypes.unused4, False),
             (PPUStatusReg.StatusTypes.overflow, True),

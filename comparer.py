@@ -18,12 +18,23 @@ while True:
         print('OK')
         break
 
-    v1 = opcode != neslog_line[0:5]
-    v2 = bytes != neslog_line[6:15]
-    v3 = instruction_str != neslog_line[16:20]
-    v4 = regs != neslog_line[48:68]
-    v5 = cycle != neslog_line[86:]
+    diffs = []
 
-    if v1 or v2 or v3 or v4 or v5:
-        print(ind, v1, v2, v3, v4, v5)
+    if opcode != neslog_line[0:5]:
+        diffs.append("OPCODE - expected: {} - actual: {}\n".format(neslog_line[0:5], opcode))
+
+    if bytes != neslog_line[6:15]:
+        diffs.append("BYTES - expected: {} - actual: {}\n".format(neslog_line[6:15], bytes))
+
+    if instruction_str != neslog_line[16:20]:
+        diffs.append("INSTR - expected: {} - actual: {}\n".format(neslog_line[16:20], instruction_str))
+
+    if regs != neslog_line[48:68]:
+        diffs.append("REGS - expected: {} - actual: {}\n".format(neslog_line[48:68], regs))
+
+    if cycle != neslog_line[86:]:
+        diffs.append("CYCLE - expected: {} - actual: {}\n".format(neslog_line[86:], cycle))
+
+    if len(diffs) > 0:
+        print(*diffs)
         break

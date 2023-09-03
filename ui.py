@@ -32,27 +32,7 @@ class UI:
         
         pygame.display.flip()
 
-    def handle_user_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == 119:
-                    # w
-                    pass
-                elif event.key == 97:
-                    # a
-                    pass
-                elif event.key == 115:
-                    # s
-                    pass
-                elif event.key == 100:
-                    # d
-                    pass
-
-            if event.type == pygame.QUIT:
-                sys.exit()
-
     def handle_ui(self):
-        self.handle_user_input()
         self.update_ui()
 
 class UI_Debug:

@@ -3,7 +3,8 @@ from memory_owner import MemoryOwner
 from ppu.ppu import PPU
 from ram import RAM
 from rom import ROM
-
+import pygame
+import sys
 
 class Bus:
     def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers, rom: ROM):
@@ -73,5 +74,26 @@ class Bus:
         if not current_nmi_state and new_nmi_state:
             self.callback()
 
+        self.handle_joystick_input()
+
     def get_nmi_status(self):
         return self.ppu.get_and_update_nmi()
+    
+    def handle_joystick_input(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == 119:
+                    print("press w")
+                    self.io_regs.joypad1.button_status = self.io_regs.joypad1.button_status | (1 << self.io_regs.joypad1.JoypadButton.UP)
+                elif event.key == 97:
+                    print("press a")
+                    self.io_regs.joypad1.button_status = self.io_regs.joypad1.button_status | (1 << self.io_regs.joypad1.JoypadButton.LEFT)
+                elif event.key == 115:
+                    print("press s")
+                    self.io_regs.joypad1.button_status = self.io_regs.joypad1.button_status | (1 << self.io_regs.joypad1.JoypadButton.DOWN)
+                elif event.key == 100:
+                    print("press d")
+                    self.io_regs.joypad1.button_status = self.io_regs.joypad1.button_status | (1 << self.io_regs.joypad1.JoypadButton.RIGHT)
+
+            if event.type == pygame.QUIT:
+                sys.exit()

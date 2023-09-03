@@ -1,14 +1,6 @@
 {
     "configurations": [
         {
-            "name": "Python Snake ROM",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": ["nestest.nes", "--snake"]
-        },
-        {
             "name": "Python Test ROM",
             "type": "python",
             "request": "launch",

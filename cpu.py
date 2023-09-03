@@ -22,8 +22,9 @@ class CPU:
         self.bus = bus
         self.debug = debug
         self.nes_test = nes_test
-        self.cycle = 7 # TODO check it, starting in 7 cause nestes.log
-        # status registers: store a single byte
+        self.cycle = 7 # debug variable to use nestest
+        
+        # status register: store a single byte
         self.status_reg: Status = None
 
         # counter registers: store a single byte
@@ -35,7 +36,6 @@ class CPU:
         self.y_reg: int = None  # y register
         self.a_reg: int = None  # a register
 
-        # program counter stores current execution point
         self.running: bool = True
 
         # create the instructions that the cpu can interpret
@@ -67,11 +67,6 @@ class CPU:
         self.y_reg = 0
         self.a_reg = 0
 
-        # TODO implement memory sets
-
-        self.bus.write_memory(0x4015, 0, num_bytes=2)
-        self.bus.write_memory(0x4017, 0, num_bytes=2)
-
     def push_to_stack(self, value, size):
         for i in range(size):
             self.bus.write_memory(0x0100 + self.sp_reg, (value >> (8 * (size - i - 1))) & 255, num_bytes=1)
@@ -87,23 +82,12 @@ class CPU:
         return value
 
     def find_instructions(self, cls) -> list[Instruction]:
-        """
-        find all available instructions
-        """
-
         subclasses = [subc for subc in cls.__subclasses__() if subc.identifier_byte is not None]
         return subclasses + [g for s in cls.__subclasses__() for g in self.find_instructions(s)]
 
     def run_rom(self, rom: ROM):
-        # load rom
         self.rom = rom
         self.pc_reg = 0xC000 if self.nes_test else 0x8000  # first rom address
-
-        if rom.is_snake_rom:
-            self.pc_reg = 0x0600
-            self.rom.memory_start_location = 0
-            for i in range(len(rom.get_memory())):
-                self.bus.write_memory(0x0600 + i, int.from_bytes(rom.get(i), 'little'))
 
         # run program
         self.running = True
@@ -113,7 +97,6 @@ class CPU:
             i += 1
 
             if self.bus.get_nmi_status():
-                print("NMI!!!")
                 self.push_to_stack(self.pc_reg, 2)
 
                 status_reg_copy = self.status_reg.copy()

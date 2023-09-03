@@ -12,6 +12,7 @@ class Bus:
         self.io_regs = io_regs
         self.rom = rom
         self.cycles = 0
+        self.callback = None
 
         self.memory_owners: list[MemoryOwner] = [
             self.ram,
@@ -64,7 +65,13 @@ class Bus:
 
     def tick(self, cycles: int):
         self.cycles += cycles
+
+        current_nmi_state = self.ppu.nmi_interrupt
         self.ppu.tick(cycles * 3)
+        new_nmi_state = self.ppu.nmi_interrupt
+
+        if not current_nmi_state and new_nmi_state:
+            self.callback()
 
     def get_nmi_status(self):
         return self.ppu.get_and_update_nmi()

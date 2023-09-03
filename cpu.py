@@ -57,7 +57,7 @@ class CPU:
         $4000-$400F: 0 (sound registers)
         """
 
-        self.callback = callback
+        self.bus.callback = callback
 
         self.pc_reg = 0
         self.status_reg = Status()  # know as 'P' on NesDev Wiki
@@ -113,6 +113,7 @@ class CPU:
             i += 1
 
             if self.bus.get_nmi_status():
+                print("NMI!!!")
                 self.push_to_stack(self.pc_reg, 2)
 
                 status_reg_copy = self.status_reg.copy()
@@ -155,21 +156,12 @@ class CPU:
 
             self.status_reg.update(instruction, value)
 
-            cur_time = time_ns()
-
-            if self.debug and cur_time - last_time > 0:
-                print('time for running instruction', cur_time - last_time, identifier_byte)
-
-            last_time = cur_time
-
             self.bus.tick(instr_cycles)
 
-            self.callback()
-
             cur_time = time_ns()
 
             if self.debug and cur_time - last_time > 0:
-                print('time for running ui', cur_time - last_time)
+                print('time for updating ppu', cur_time - last_time)
 
             last_time = cur_time
 

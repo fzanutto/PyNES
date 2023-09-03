@@ -1,7 +1,7 @@
 from frame import Frame
 from memory_owner import MemoryOwner
-from ppu.control_reg import ControlReg
-from ppu.status_reg import StatusReg
+from ppu.control_reg import PPUControlReg
+from ppu.status_reg import PPUStatusReg
 
 
 class PPU(MemoryOwner):
@@ -44,8 +44,8 @@ class PPU(MemoryOwner):
         self.addr_reg_pointer = 0
         self.internal_data_buf = 0
         self.mirror_mode = screen_mirroring  # 0: horizontal - 1: vertical
-        self.control_reg = ControlReg()
-        self.status_reg = StatusReg()
+        self.control_reg = PPUControlReg()
+        self.status_reg = PPUStatusReg()
 
         self.scroll_reg = [0, 0] # high, low
         self.scroll_reg_pointer = 0
@@ -60,7 +60,7 @@ class PPU(MemoryOwner):
         return cur_value
 
     def increment_ram_addr(self):
-        inc = 32 if (self.control_reg.bits[ControlReg.StatusTypes.ram_increment]) > 0 else 1
+        inc = 32 if (self.control_reg.bits[PPUControlReg.StatusTypes.ram_increment]) > 0 else 1
 
         low_addr = self.addr_reg[1]
         self.addr_reg[1] = (self.addr_reg[1] + inc) & 0xFF
@@ -139,7 +139,7 @@ class PPU(MemoryOwner):
         return result
 
     def write_oam_data(self, value: int):
-        if self.status_reg.bits[StatusReg.StatusTypes.vblank] == 1:
+        if self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] == 1:
             self.get_memory()[0x2003 - self.memory_start_location] = (self.get_memory()[0x2003 - self.memory_start_location] + 1) & 255
 
         super().set(0x2004, value, 1)
@@ -167,7 +167,7 @@ class PPU(MemoryOwner):
             raise Exception("Trying to read write-only PPU address:", hex(position))
         elif position == 0x2002:
             value = self.status_reg.to_int()
-            self.status_reg.bits[StatusReg.StatusTypes.vblank] = 0
+            self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 0
             self.addr_reg_pointer = 0
             self.scroll_reg_pointer = 0
             return value
@@ -180,10 +180,10 @@ class PPU(MemoryOwner):
         return super().get(position)
 
     def update_control_reg(self, value: int):
-        current_nmi_status = self.control_reg.bits[ControlReg.StatusTypes.vblank]
+        current_nmi_status = self.control_reg.bits[PPUControlReg.StatusTypes.vblank]
         self.control_reg.from_int(value)
-        new_nmi_status = self.control_reg.bits[ControlReg.StatusTypes.vblank]
-        if not current_nmi_status and new_nmi_status and self.status_reg.bits[StatusReg.StatusTypes.vblank] == 1:
+        new_nmi_status = self.control_reg.bits[PPUControlReg.StatusTypes.vblank]
+        if not current_nmi_status and new_nmi_status and self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] == 1:
             self.nmi_interrupt = True
 
     def tick(self, cycles: int):
@@ -193,24 +193,27 @@ class PPU(MemoryOwner):
             self.cycles %= 341
 
             self.scanline += 1
-
+            
             if self.scanline == 241:
-                self.status_reg.bits[StatusReg.StatusTypes.vblank] = 1
-                if self.control_reg.bits[ControlReg.StatusTypes.vblank]:
+                self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 1
+                if self.control_reg.bits[PPUControlReg.StatusTypes.vblank]:
                     self.nmi_interrupt = True
+                else:
+                    print("PPU control reg vblank is false")
 
             elif self.scanline >= 262:
                 self.scanline = 0
-                self.status_reg.bits[StatusReg.StatusTypes.sprite_0_hit] = 0
-                self.status_reg.bits[StatusReg.StatusTypes.vblank] = 0
+                self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 0
+                self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 0
                 self.nmi_interrupt = False
                 
 
     def render(self, frame: Frame):
-        bank = self.control_reg.bits[ControlReg.StatusTypes.background_pattern_addr]
-        frame = Frame()
-        for i in 0x03C0:
+        bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
+        
+        for i in range(0x03C0):
             tile = self.ram[i]
+            
             tile_x = i % 32
             tile_y = i // 32
 
@@ -220,8 +223,8 @@ class PPU(MemoryOwner):
             for y in range(8):
                 upper = tile[y]
                 lower = tile[y + 8]
-                for x in range(8, -1, -1):
-                    value = (1 & upper) | (1 & lower)
+                for x in range(7, -1, -1):
+                    value = ((1 & upper) << 1) | (1 & lower)
                     upper = upper >> 1
                     lower = lower >> 1
 

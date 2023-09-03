@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from enum import Enum
 
-class StatusReg:
+class PPUStatusReg:
     """
     7  bit  0
     ---- ----
@@ -37,14 +37,14 @@ class StatusReg:
 
     def __init__(self):
         self.bits = OrderedDict([
-            (StatusReg.StatusTypes.unused0, False),
-            (StatusReg.StatusTypes.unused1, False),
-            (StatusReg.StatusTypes.unused2, True),
-            (StatusReg.StatusTypes.unused3, False),
-            (StatusReg.StatusTypes.unused4, False),
-            (StatusReg.StatusTypes.overflow, True),
-            (StatusReg.StatusTypes.sprite_0_hit, False),
-            (StatusReg.StatusTypes.vblank, False),
+            (PPUStatusReg.StatusTypes.unused0, False),
+            (PPUStatusReg.StatusTypes.unused1, False),
+            (PPUStatusReg.StatusTypes.unused2, True),
+            (PPUStatusReg.StatusTypes.unused3, False),
+            (PPUStatusReg.StatusTypes.unused4, False),
+            (PPUStatusReg.StatusTypes.overflow, True),
+            (PPUStatusReg.StatusTypes.sprite_0_hit, False),
+            (PPUStatusReg.StatusTypes.vblank, True)
         ])
 
     def to_int(self) -> int:

@@ -15,6 +15,14 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "args": ["smb.nes"]
+        },
+        {
+            "name": "Python Balloon Fight ROM",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["balloonfight.nes"]
         }
     ]
 }

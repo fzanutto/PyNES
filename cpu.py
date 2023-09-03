@@ -17,10 +17,11 @@ import instructions.unofficial_instructions as u_file
 
 
 class CPU:
-    def __init__(self, bus: Bus, debug: bool = False):
+    def __init__(self, bus: Bus, debug: bool = False, nes_test: bool = False):
         self.rom = None
         self.bus = bus
         self.debug = debug
+        self.nes_test = nes_test
         self.cycle = 7 # TODO check it, starting in 7 cause nestes.log
         # status registers: store a single byte
         self.status_reg: Status = None
@@ -96,7 +97,7 @@ class CPU:
     def run_rom(self, rom: ROM):
         # load rom
         self.rom = rom
-        self.pc_reg = 0xC000  # first rom address
+        self.pc_reg = 0xC000 if self.nes_test else 0x8000  # first rom address
 
         if rom.is_snake_rom:
             self.pc_reg = 0x0600

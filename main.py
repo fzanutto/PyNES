@@ -14,10 +14,13 @@ def main():
     parser.add_argument('rom_path',
                         metavar='rom_path',
                         type=str,
-                        help='path to rom')
+                        help='path to rom',
+                        default='',
+                        nargs='?')
 
     parser.add_argument('--debug', dest='debug', const=True, default=False, help='logs the running program', nargs='?')
     parser.add_argument('--snake', dest='snake', const=True, default=False, help='runs the snake game', nargs='?')
+    parser.add_argument('--nestest', dest='nestest', const=True, default=False, help='runs nestest rom', nargs='?')
     args = parser.parse_args()
 
     # load rom
@@ -44,6 +47,10 @@ def main():
             0xa6, 0x03, 0xa9, 0x00, 0x81, 0x10, 0xa2, 0x00, 0xa9, 0x01, 0x81, 0x10, 0x60, 0xa2, 0x00, 0xea,
             0xea, 0xca, 0xd0, 0xfb, 0x60
         ])))
+    elif args.nestest:
+        args.debug = True
+        with open('nestest.nes', 'rb') as file:
+            rom_bytes = file.read()
     else:
         with open(args.rom_path, 'rb') as file:
             rom_bytes = file.read()
@@ -61,7 +68,7 @@ def main():
     bus = Bus(ram, ppu, io_regs, rom)
 
     # create cpu
-    cpu = CPU(bus, args.debug)
+    cpu = CPU(bus, args.debug, args.nestest)
     
     ui = UI(cpu, rom.chr_rom)
 

@@ -62,17 +62,10 @@ class PPU(MemoryOwner):
     def increment_ram_addr(self):
         inc = 32 if (self.control_reg.bits[PPUControlReg.StatusTypes.ram_increment]) > 0 else 1
 
-        low_addr = self.addr_reg[1]
-        self.addr_reg[1] = (self.addr_reg[1] + inc) & 0xFF
-
-        if low_addr > self.addr_reg[1]:
-            self.addr_reg[0] = (self.addr_reg[0] + inc) & 0xFF
-
-        addr = self.get_addr_reg()
-        if addr > 0x3FFF:
-            self.set_addr_reg(addr & 0x3FFF)
+        self.set_addr_reg(self.get_addr_reg() + inc)
 
     def set_addr_reg(self, value):
+        value %= 0x3fff
         self.addr_reg[0] = value >> 8
         self.addr_reg[1] = value & 0xFF
 
@@ -153,7 +146,7 @@ class PPU(MemoryOwner):
             self.scroll_reg[self.scroll_reg_pointer] = value
             self.scroll_reg_pointer ^= 1
         elif position == 0x2006:
-            self.addr_reg[self.addr_reg_pointer] = value
+            self.addr_reg[self.addr_reg_pointer] = value % 0xFF
             self.addr_reg_pointer ^= 1
         elif position == 0x2007:
             self.write_to_data(value)

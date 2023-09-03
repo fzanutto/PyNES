@@ -10,16 +10,19 @@ size = width, height = 256 * 4, 240 * 4
 
 
 class UI:
-    def __init__(self, cpu: CPU, chr_rom):
+    def __init__(self, cpu: CPU, ppu: PPU):
         self.cpu = cpu
-        self.chr_rom = chr_rom
-        self.frame = self.create_frame(chr_rom, 0)
+        self.ppu = ppu
+        self.chr_rom = ppu.chr_rom
+        self.frame = Frame()
         self.screen = pygame.display.set_mode(size)
         self.square = pygame.Surface((4,4))
         self.handle_and_update_ui = self.handle_ui
         self.memory_owner = self.cpu.bus.get_memory_owner(0x200)
 
     def update_ui(self):
+        self.ppu.render(self.frame)
+        
         for x in range(Frame.WIDTH):
             for y in range(Frame.HEIGHT):
                 color = self.frame.data[y * Frame.WIDTH + x]
@@ -28,40 +31,6 @@ class UI:
                 self.screen.blit(self.square, draw)
         
         pygame.display.flip()
-
-    def create_frame(self, chr_rom, bank: int) -> Frame:
-        frame = Frame()
-
-        bank = bank * 0x1000
-
-        for tile_n in range(256):
-            start_position = bank + tile_n * 16
-            tile = chr_rom[start_position : start_position + 16]
-
-            for y in range(8):
-                upper = tile[y]
-                lower = tile[y + 8]
-                for x in range(7,-1,-1):
-                    value = (1 & upper) << 1 | (1 & lower)
-                    upper  = upper >> 1
-                    lower = lower >> 1
-                    
-                    rgb = (0,0,0)
-                    if value == 0:
-                        rgb = PPU.SYSTEM_PALLETE[0x01]
-                    elif value == 1:
-                        rgb = PPU.SYSTEM_PALLETE[0x23]
-                    elif value == 2:
-                        rgb = PPU.SYSTEM_PALLETE[0x27]
-                    elif value == 3:
-                        rgb = PPU.SYSTEM_PALLETE[0x30]
-
-                    true_x = x + ((tile_n % 20) * 8) + 1
-                    true_y = y + ((tile_n // 20) * 8) + 1
-
-                    frame.set_pixel(true_x, true_y, rgb)
-
-        return frame
 
     def handle_user_input(self):
         for event in pygame.event.get():

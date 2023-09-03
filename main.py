@@ -1,7 +1,6 @@
 import argparse
 from bus import Bus
 from cpu import CPU
-from frame import Frame
 from io_registers import IO_Registers
 from ram import RAM
 from ppu.ppu import PPU
@@ -70,7 +69,7 @@ def main():
     # create cpu
     cpu = CPU(bus, args.debug, args.nestest)
     
-    ui = UI(cpu, rom.chr_rom)
+    ui = UI(cpu, ppu)
 
     cpu.start_up(ui.handle_and_update_ui)
     cpu.run_rom(rom)

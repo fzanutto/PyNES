@@ -210,7 +210,7 @@ class PPU(MemoryOwner):
             tile_x = i % 32
             tile_y = i // 32
 
-            start_position = bank + tile * 16
+            start_position = (0x1000 if bank else 0) + tile * 16
             tile = self.chr_rom[start_position: start_position + 16]
 
             for y in range(8):

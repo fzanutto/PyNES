@@ -130,10 +130,10 @@ class PPU(MemoryOwner):
         return result
 
     def write_oam_data(self, value: int):
-        if self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] == 1:
-            self.get_memory()[0x2003 - self.memory_start_location] = (self.get_memory()[0x2003 - self.memory_start_location] + 1) & 255
-
         super().set(0x2004, value, 1)
+        current_oam_address = self.get_memory()[0x2003 - self.memory_start_location]
+        self.get_memory()[0x2003 - self.memory_start_location] = (current_oam_address + 1) & 255
+        self.oam_data[current_oam_address] = value
 
     def set(self, position: int, value: int, size: int = 1):
         if position == 0x2000:

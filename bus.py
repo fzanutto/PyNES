@@ -60,10 +60,18 @@ class Bus:
     def write_memory(self, position: int, value: int, num_bytes: int = 1):
         mem_owner = self.get_memory_owner(position)
 
+        if position == 0x4014:
+            self.write_to_oam_dma(value)
+
         position = self.get_actual_location(mem_owner, position)
 
         mem_owner.set(position, value, num_bytes)
 
+    def write_to_oam_dma(self, location: int):
+        for i in range(0xFF):
+            value = self.read_memory((location << 8) | i)
+            self.ppu.write_oam_data(value)
+        
     def tick(self, cycles: int):
         self.cycles += cycles
 

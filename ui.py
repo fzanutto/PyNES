@@ -10,7 +10,7 @@ size = width, height = 256 * 4, 240 * 4
 
 
 class UI:
-    def __init__(self, cpu: CPU, chr_rom, frame) -> None:
+    def __init__(self, cpu: CPU, chr_rom):
         self.cpu = cpu
         self.chr_rom = chr_rom
         self.frame = self.create_frame(chr_rom, 0)

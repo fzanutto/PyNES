@@ -58,15 +58,12 @@ def main():
 
     io_regs = IO_Registers()
 
-
-    frame = Frame()
-
     bus = Bus(ram, ppu, io_regs, rom)
 
     # create cpu
     cpu = CPU(bus, args.debug)
     
-    ui = UI(cpu, rom.chr_rom, frame)
+    ui = UI(cpu, rom.chr_rom)
 
     cpu.start_up(ui.handle_and_update_ui)
     cpu.run_rom(rom)

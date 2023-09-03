@@ -123,11 +123,7 @@ class CPU:
                 self.status_reg.bits[Status.StatusTypes.interrupt] = 1
 
                 self.bus.tick(2)
-                # TODO: find out where FFFA should be stored at, maybe RAM?
-                self.pc_reg = self.bus.read_memory(0xFFFA)
-                print('-------------')
-                print(self.pc_reg)
-                print('-------------')
+                self.pc_reg = int.from_bytes(self.bus.read_memory_bytes(0xFFFA, 2), byteorder='little')
                 continue
 
             # get the current byte at pc

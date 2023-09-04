@@ -1,6 +1,7 @@
 from frame import Frame
 from memory_owner import MemoryOwner
 from ppu.control_reg import PPUControlReg
+from ppu.mask_reg import PPUMaskReg
 from ppu.status_reg import PPUStatusReg
 
 
@@ -46,11 +47,12 @@ class PPU(MemoryOwner):
         self.mirror_mode = screen_mirroring  # 0: horizontal - 1: vertical
         self.control_reg = PPUControlReg()
         self.status_reg = PPUStatusReg()
+        self.mask_reg = PPUMaskReg()
 
         self.scroll_reg = [0, 0] # high, low
         self.scroll_reg_pointer = 0
 
-        self.cycles = 0
+        self.current_cycle = 0
         self.scanline = 0
         self.nmi_interrupt = False
 
@@ -138,6 +140,8 @@ class PPU(MemoryOwner):
     def set(self, position: int, value: int, size: int = 1):
         if position == 0x2000:
             self.update_control_reg(value)
+        elif position == 0x2001:
+            self.update_mask_reg(value)
         elif position == 0x2004:
             self.write_oam_data(value)
         elif position == 0x2005:
@@ -177,23 +181,36 @@ class PPU(MemoryOwner):
         if not current_nmi_status and new_nmi_status and self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] == 1:
             self.nmi_interrupt = True
 
+    def update_mask_reg(self, value: int):
+        self.mask_reg.from_int(value)
+
     def tick(self, cycles: int):
-        self.cycles += cycles
+        self.current_cycle += cycles
 
-        if self.cycles >= 341:
-            self.cycles %= 341
+        if self.current_cycle >= 341:
 
+            if self.is_sprite_0_hit():
+                self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 1
+
+            self.current_cycle %= 341
             self.scanline += 1
             
             if self.scanline == 241:
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 1
-                self.nmi_interrupt = self.control_reg.bits[PPUControlReg.StatusTypes.vblank]
+                self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 0
+                if self.control_reg.bits[PPUControlReg.StatusTypes.vblank]:
+                    self.nmi_interrupt = True
 
             elif self.scanline >= 262:
                 self.scanline = 0
                 self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 0
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 0
                 self.nmi_interrupt = False
+
+    def is_sprite_0_hit(self) -> bool:
+        y = self.oam_data[0]
+        x = self.oam_data[3]
+        return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]
                 
     def get_background_pallete(self, column: int, row: int):
         table_index = row // 4 * 8 + column // 4

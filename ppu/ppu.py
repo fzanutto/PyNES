@@ -231,10 +231,12 @@ class PPU(MemoryOwner):
         ]
 
     def render(self, frame: Frame):
-        bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
-        
-        self.render_background(frame, bank)
-        self.render_sprites(frame, bank)
+        background_bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
+        sprite_bank = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_pattern_addr]
+        sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
+
+        self.render_background(frame, background_bank)
+        self.render_sprites(frame, sprite_bank, sprite_16_8)
 
     def render_background(self, frame: Frame, bank):
         for i in range(0x03C0):
@@ -269,11 +271,11 @@ class PPU(MemoryOwner):
 
                     frame.set_pixel(tile_column * 8 + x,tile_row * 8 + y, rgb)
 
-    def render_sprites(self, frame: Frame, bank):
+    def render_sprites(self, frame: Frame, bank, sprite16: bool):
         for i in range(len(self.oam_data) - 4, -1, -4):
             tile_index = self.oam_data[i + 1]
-            tile_column = self.oam_data[i + 3]
-            tile_row = self.oam_data[i]
+            tile_x = self.oam_data[i + 3]
+            tile_y = self.oam_data[i]
 
             flip_vertical = self.oam_data[i + 2] >> 7 & 1
             flip_horizontal = self.oam_data[i + 2] >> 6 & 1
@@ -303,12 +305,12 @@ class PPU(MemoryOwner):
                     elif value == 3:
                         rgb = PPU.SYSTEM_PALLETE[sprite_pallete[3]]
 
-                    final_x = tile_column + x
-                    final_y = tile_row + y
+                    final_x = tile_x + x
+                    final_y = tile_y + y
                     if flip_horizontal:
-                        final_x = tile_column + 7 - x
+                        final_x = tile_x + 7 - x
 
                     if flip_vertical:
-                        final_y = tile_row + 7 - y
+                        final_y = tile_y + 7 - y
 
                     frame.set_pixel(final_x, final_y, rgb)

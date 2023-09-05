@@ -215,7 +215,12 @@ class PPU(MemoryOwner):
         return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites] and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]
                 
     def get_background_pallete(self, column: int, row: int, attribute_table: list[int]):
+        # https://www.nesdev.org/wiki/PPU_attribute_tables
+
         table_index = row // 4 * 8 + column // 4
+        
+        # bug: attribute table on last index is probably not being updated
+        # print(attribute_table[-1])
         byte = attribute_table[table_index]
 
         tile_column = (column % 4) // 2
@@ -267,7 +272,7 @@ class PPU(MemoryOwner):
         main_nametable = None
         second_nametable = None
 
-        if vertical_mirror:
+        if vertical_mirror: # SMB is vertical mirror
             if nametable_address in [0x2000, 0x2800]:
                 main_nametable = self.ram[0 : 0x400]
                 second_nametable = self.ram[0x400 : 0x800]
@@ -292,7 +297,8 @@ class PPU(MemoryOwner):
             self.render_nametable(frame, bank, second_nametable, [0, 0, 256, scroll_y], 0, 240-scroll_y)
 
     def render_nametable(self, frame: Frame, bank: bool, nametable: list[int], rect: tuple[4], shift_x: int, shift_y: int):
-        attribute_table = nametable[0x3c0 : 0x400]
+        attribute_table = nametable[0x3c0:]
+
         bank_index = 0x1000 if bank else 0
         for i in range(30 * 32):
             tile_index = self.ram[i]
@@ -314,15 +320,7 @@ class PPU(MemoryOwner):
                     upper = upper >> 1
                     lower = lower >> 1
 
-                    rgb = (0,0,0)
-                    if value == 0:
-                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[0]]
-                    elif value == 1:
-                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[1]]
-                    elif value == 2:
-                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[2]]
-                    elif value == 3:
-                        rgb = PPU.SYSTEM_PALLETE[pallete_indexes[3]]
+                    rgb = PPU.SYSTEM_PALLETE[pallete_indexes[value]]
 
                     pixel_x = tile_column * 8 + x
                     pixel_y = tile_row * 8 + y

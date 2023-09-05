@@ -49,7 +49,7 @@ class PPU(MemoryOwner):
         self.status_reg = PPUStatusReg()
         self.mask_reg = PPUMaskReg()
 
-        self.scroll_reg = [0, 0] # high, low
+        self.scroll_reg = [0, 0] # x, y
         self.scroll_reg_pointer = 0
 
         self.current_cycle = 0
@@ -67,18 +67,15 @@ class PPU(MemoryOwner):
         self.set_addr_reg(self.get_addr_reg() + inc)
 
     def set_addr_reg(self, value):
-        value %= 0x3fff
+        value &= 0x3fff
         self.addr_reg[0] = value >> 8
         self.addr_reg[1] = value & 0xFF
 
     def get_addr_reg(self):
-        return (self.addr_reg[0] << 8 | self.addr_reg[1]) & int('0b11111111111111', 2)
-
-    def get_scroll_reg(self, value):
-        return (self.scroll_reg[0] << 8 | self.scroll_reg[1]) & int('0b11111111111111', 2)
+        return (self.addr_reg[0] << 8 | self.addr_reg[1]) & 0b11111111111111
 
     def mirror_ram_addr(self, addr: int) -> int:
-        mirrored_ram = addr & int('0b10111111111111', 2) # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
+        mirrored_ram = addr & 0b10111111111111 # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
         ram_index = mirrored_ram - 0x2000
         name_table = ram_index // 0x400
 
@@ -101,9 +98,8 @@ class PPU(MemoryOwner):
         elif addr <= 0x3eff:
             self.ram[self.mirror_ram_addr(addr)] = value
         elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
-            add_mirror = addr - 0x10
-            self.palette_table[addr - 0x3f00] = value
-            self.palette_table[add_mirror - 0x3f00] = value
+            address_mirror = addr - 0x10
+            self.palette_table[address_mirror - 0x3f00] = value
         elif addr <= 0x3fff:
             self.palette_table[(addr - 0x3f00) % 0x20] = value
         else:
@@ -124,8 +120,8 @@ class PPU(MemoryOwner):
         elif addr <= 0x3EFF:
             raise Exception("Addr not expected to be used")
         elif addr in [0x3f10, 0x3f14, 0x3f18, 0x3f1c]:
-            add_mirror = addr - 0x10
-            result = self.palette_table[add_mirror - 0x3f00]
+            address_mirror = addr - 0x10
+            result = self.palette_table[address_mirror - 0x3f00]
         elif addr <= 0x3FFF:
             result = self.palette_table[(addr - 0x3f00) % 0x20]
 
@@ -153,7 +149,7 @@ class PPU(MemoryOwner):
         elif position == 0x2007:
             self.write_to_data(value)
         elif 0x2008 <= position:
-            self.set(position & int('0b0010000000000111', 2), value, size)
+            self.set(position & 0b0010000000000111, value, size)
         else:
             super().set(position, value, size)
 
@@ -170,7 +166,7 @@ class PPU(MemoryOwner):
             return self.read_data()
 
         elif position >= 0x2008:
-            return self.get(position & int('0b00100000_00000111', 2))
+            return self.get(position & 0b00100000_00000111)
 
         return super().get(position)
 

@@ -48,6 +48,8 @@ class PPU(MemoryOwner):
         self.control_reg = PPUControlReg()
         self.status_reg = PPUStatusReg()
         self.mask_reg = PPUMaskReg()
+        self.oam_address_reg = 0
+        self.oam_data_reg = 0
 
         self.scroll_reg = [0, 0] # x, y
         self.scroll_reg_pointer = 0
@@ -67,12 +69,11 @@ class PPU(MemoryOwner):
         self.set_addr_reg(self.get_addr_reg() + inc)
 
     def set_addr_reg(self, value):
-        value &= 0x3fff
-        self.addr_reg[0] = value >> 8
+        self.addr_reg[0] = (value >> 8) & 0x3F
         self.addr_reg[1] = value & 0xFF
 
     def get_addr_reg(self):
-        return (self.addr_reg[0] << 8 | self.addr_reg[1]) & 0b11111111111111
+        return self.addr_reg[0] << 8 | self.addr_reg[1]
 
     def mirror_ram_addr(self, addr: int) -> int:
         mirrored_ram = addr & 0b10111111111111 # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
@@ -128,16 +129,17 @@ class PPU(MemoryOwner):
         return result
 
     def write_oam_data(self, value: int):
-        super().set(0x2004, value, 1)
-        current_oam_address = self.get_memory()[0x2003 - self.memory_start_location]
-        self.get_memory()[0x2003 - self.memory_start_location] = (current_oam_address + 1) & 255
-        self.oam_data[current_oam_address] = value
+        self.oam_data_reg = value
+        self.oam_data[self.oam_address_reg] = value
+        self.oam_address_reg = (self.oam_address_reg + 1) & 0xFF
 
     def set(self, position: int, value: int, size: int = 1):
         if position == 0x2000:
             self.update_control_reg(value)
         elif position == 0x2001:
             self.update_mask_reg(value)
+        elif position == 0x2003:
+            self.oam_address_reg = value
         elif position == 0x2004:
             self.write_oam_data(value)
         elif position == 0x2005:
@@ -162,6 +164,8 @@ class PPU(MemoryOwner):
             self.addr_reg_pointer = 0
             self.scroll_reg_pointer = 0
             return value
+        elif position == 0x2004:
+            return self.oam_data_reg
         elif position == 0x2007:
             return self.read_data()
 
@@ -183,8 +187,10 @@ class PPU(MemoryOwner):
     def tick(self, cycles: int):
         self.current_cycle += cycles
 
-        if self.current_cycle >= 341:
+        if 257 <= self.current_cycle <= 320:
+            self.oam_address_reg = 0
 
+        if self.current_cycle >= 341:
             if self.is_sprite_0_hit():
                 self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 1
 
@@ -244,16 +250,14 @@ class PPU(MemoryOwner):
         ]
 
     def render(self, frame: Frame):
-        background_bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
-        sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
-
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]:
-            self.render_background(frame, background_bank)
+            self.render_background(frame)
         
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]:
+            sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
             self.render_sprites(frame, sprite_16_8)
 
-    def render_background(self, frame: Frame, bank: bool):
+    def render_background(self, frame: Frame):
         nametable_address = self.control_reg.get_nametable_addr()
         scroll_x = self.scroll_reg[0]
         scroll_y = self.scroll_reg[1]
@@ -290,7 +294,7 @@ class PPU(MemoryOwner):
     def render_nametable(self, frame: Frame, bank: bool, nametable: list[int], rect: tuple[4], shift_x: int, shift_y: int):
         attribute_table = nametable[0x3c0 : 0x400]
         bank_index = 0x1000 if bank else 0
-        for i in range(0x03C0):
+        for i in range(30 * 32):
             tile_index = self.ram[i]
             
             tile_column = i % 32

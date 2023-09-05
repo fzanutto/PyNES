@@ -7,5 +7,5 @@ class Frame:
 
     def set_pixel(self, x: int, y: int, rgb: tuple[3]):
         position = y * Frame.WIDTH + x
-        if position < len(self.data):
+        if position < 256 * 240:
             self.data[position] = rgb

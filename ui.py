@@ -2,6 +2,7 @@ import random
 from cpu import CPU
 import pygame
 import sys
+from time import time_ns
 
 from frame import Frame
 from ppu.ppu import PPU
@@ -19,18 +20,27 @@ class UI:
         self.square = pygame.Surface((4,4))
         self.handle_and_update_ui = self.handle_ui
         self.memory_owner = self.cpu.bus.get_memory_owner(0x200)
+        self.start_time = time_ns()
+        self.frame_count = 0
 
     def update_ui(self):
-        self.ppu.render(self.frame)
+        if self.frame_count % 20 == 0:
+            self.ppu.render(self.frame)
+            
+            for x in range(Frame.WIDTH):
+                for y in range(Frame.HEIGHT):
+                    color = self.frame.data[y * Frame.WIDTH + x]
+                    self.square.fill(color)
+                    draw = pygame.Rect((x*4)+1, (y*4)+1, 4, 4)
+                    self.screen.blit(self.square, draw)
+            
+            pygame.display.flip()
+
+        cur_time = time_ns()
+        diff = cur_time - self.start_time
         
-        for x in range(Frame.WIDTH):
-            for y in range(Frame.HEIGHT):
-                color = self.frame.data[y * Frame.WIDTH + x]
-                self.square.fill(color)
-                draw = pygame.Rect((x*4)+1, (y*4)+1, 4, 4)
-                self.screen.blit(self.square, draw)
-        
-        pygame.display.flip()
+        self.frame_count += 1
+        print("FPS: {}".format(10**9 * self.frame_count / diff))
 
     def handle_ui(self):
         self.update_ui()

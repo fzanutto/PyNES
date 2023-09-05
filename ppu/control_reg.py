@@ -52,3 +52,17 @@ class PPUControlReg:
     def from_int(self, value: int):
         for i in self.bits:
             self.bits[i] = (value & (1 << i.value)) > 0
+
+
+    def get_nametable_addr(self):
+        nametable_bits = self.to_int() & 0b11
+        # (0 = $2000; 1 = $2400; 2 = $2800; 3 = $2C00)
+        if nametable_bits == 0:
+            return 0x2000
+        elif nametable_bits == 1:
+            return 0x2400
+        elif nametable_bits == 2:
+            return 0x2800
+        else:
+            return 0x2C00
+

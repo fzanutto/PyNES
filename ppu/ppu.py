@@ -62,7 +62,7 @@ class PPU(MemoryOwner):
         return cur_value
 
     def increment_ram_addr(self):
-        inc = 32 if (self.control_reg.bits[PPUControlReg.StatusTypes.ram_increment]) > 0 else 1
+        inc = 32 if self.control_reg.bits[PPUControlReg.StatusTypes.ram_increment] else 1
 
         self.set_addr_reg(self.get_addr_reg() + inc)
 
@@ -206,7 +206,7 @@ class PPU(MemoryOwner):
     def is_sprite_0_hit(self) -> bool:
         y = self.oam_data[0]
         x = self.oam_data[3]
-        return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]
+        return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites] and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]
                 
     def get_background_pallete(self, column: int, row: int, attribute_table: list[int]):
         table_index = row // 4 * 8 + column // 4
@@ -247,8 +247,11 @@ class PPU(MemoryOwner):
         background_bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
         sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
 
-        self.render_background(frame, background_bank)
-        self.render_sprites(frame, sprite_16_8)
+        if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]:
+            self.render_background(frame, background_bank)
+        
+        if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]:
+            self.render_sprites(frame, sprite_16_8)
 
     def render_background(self, frame: Frame, bank: bool):
         nametable_address = self.control_reg.get_nametable_addr()

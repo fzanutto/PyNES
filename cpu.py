@@ -25,16 +25,16 @@ class CPU:
         self.cycle = 7 # debug variable to use nestest
         
         # status register: store a single byte
-        self.status_reg: Status = None
+        self.status_reg: Status = Status()
 
         # counter registers: store a single byte
-        self.pc_reg: int = None  # program counter
-        self.sp_reg: int = None  # stack pointer
+        self.pc_reg: int = 0  # program counter
+        self.sp_reg: int = 0  # stack pointer
 
         # data registers: store a single byte
-        self.x_reg: int = None  # x register
-        self.y_reg: int = None  # y register
-        self.a_reg: int = None  # a register
+        self.x_reg: int = 0  # x register
+        self.y_reg: int = 0  # y register
+        self.a_reg: int = 0  # a register
 
         self.running: bool = True
 
@@ -91,11 +91,9 @@ class CPU:
 
         # run program
         self.running = True
-        i = 0
         last_time = time_ns()
+        
         while self.running:
-            i += 1
-
             if self.bus.get_nmi_status():
                 self.push_to_stack(self.pc_reg, 2)
 
@@ -109,19 +107,12 @@ class CPU:
 
                 self.bus.tick(2)
                 self.pc_reg = int.from_bytes(self.bus.read_memory_bytes(0xFFFA, 2), byteorder='little')
-                continue
 
             # get the current byte at pc
-            identifier_byte = self.bus.read_memory(self.pc_reg)
-
-            if type(identifier_byte) == int:
-                identifier_byte = bytes([identifier_byte])
+            identifier_byte = bytes([self.bus.read_memory(self.pc_reg)])
 
             # turn the byte into an Instruction
             instruction = self.instructions.get(identifier_byte)
-
-            if instruction is None:
-                raise Exception('PC: {} Instruction not found: {}'.format(hex(self.pc_reg), identifier_byte))
 
             # get the data bytes
             data_bytes = self.bus.read_memory_bytes(self.pc_reg + 1, instruction.data_length)

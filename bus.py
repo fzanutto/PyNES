@@ -13,7 +13,6 @@ class Bus:
         self.ppu = ppu
         self.io_regs = io_regs
         self.rom = rom
-        self.cycles = 0
         self.callback = None
 
         self.memory_owners: list[MemoryOwner] = [
@@ -22,12 +21,6 @@ class Bus:
             self.io_regs,
             self.rom
         ]
-
-    def get_actual_location(self, mem_owner: MemoryOwner, location: int) -> int:
-        if type(mem_owner) is RAM:
-            location &= ((1 << 11) - 1)
-
-        return location
 
     def get_memory_owner(self, location: int):
         """
@@ -42,15 +35,10 @@ class Bus:
 
     def read_memory(self, position: int):
         mem_owner = self.get_memory_owner(position)
-
-        actual_position = self.get_actual_location(mem_owner, position)
-        return mem_owner.get(actual_position)
+        return mem_owner.get(position)
 
     def read_memory_bytes(self, position: int, size: int = 1) -> bytes:
         mem_owner = self.get_memory_owner(position)
-
-        position = self.get_actual_location(mem_owner, position)
-
         value = mem_owner.get_bytes(position, size)
 
         if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
@@ -64,8 +52,6 @@ class Bus:
         if position == 0x4014:
             self.write_to_oam_dma(value)
 
-        position = self.get_actual_location(mem_owner, position)
-
         mem_owner.set(position, value, num_bytes)
 
     def write_to_oam_dma(self, location: int):
@@ -74,8 +60,6 @@ class Bus:
             self.ppu.write_oam_data(value)
         
     def tick(self, cycles: int):
-        self.cycles += cycles
-
         current_nmi_state = self.ppu.nmi_interrupt
         self.ppu.tick(cycles * 3)
         new_nmi_state = self.ppu.nmi_interrupt
@@ -126,5 +110,5 @@ class Bus:
                 elif event.key == pygame.K_s:
                     self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.SELECT
 
-            if event.type == pygame.QUIT:
+            elif event.type == pygame.QUIT:
                 sys.exit()

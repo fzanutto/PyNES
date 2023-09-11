@@ -46,9 +46,6 @@ class Status:
         ])
 
     def update(self, instruction: Instruction, value: int):
-        """
-        update the status based on the instruction attributes and the valye calculated
-        """
         if instruction.sets_zero_bit:
             self.bits[Status.StatusTypes.zero] = value == 0
         if instruction.sets_negative_bit:

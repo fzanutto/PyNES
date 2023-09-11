@@ -68,7 +68,7 @@ class SbcNop(ImmediateReadAddressing, Sbc):
         value = super().get_data(cpu, memory_address, data_bytes)
         value = (~value) & 255
 
-        return super().sub_carry(cpu, memory_address, data_bytes, value)
+        return super().sub_carry(cpu, value)
 
 
 class Dcp(WritesToMem, Instruction):

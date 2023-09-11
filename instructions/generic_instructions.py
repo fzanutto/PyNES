@@ -5,6 +5,7 @@ class Instruction:
     identifier_byte: bytes = None
     sets_zero_bit = False
     sets_negative_bit = False
+    data_length = 0
 
     @classmethod
     def get_cycles(cls):
@@ -13,6 +14,10 @@ class Instruction:
     @classmethod
     def get_address(cls, cpu, data_bytes: bytes) -> Optional[int]:
         return None
+
+    @classmethod
+    def get_instruction_length(cls):
+        return 1
 
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):

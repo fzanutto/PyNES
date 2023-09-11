@@ -75,7 +75,6 @@ class Brk(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         cpu.push_to_stack(cpu.pc_reg + 1, 2)
-
         cpu.push_to_stack(cpu.status_reg.to_int() | (1 << 4), 1)
 
     @classmethod

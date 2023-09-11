@@ -37,6 +37,7 @@ class BranchClear(RelativeAddressing, Jmp):
         else:
             cls.add_cycle_from_branch = 0
 
+
 class Ld(Instruction):
     sets_zero_bit = True
     sets_negative_bit = True

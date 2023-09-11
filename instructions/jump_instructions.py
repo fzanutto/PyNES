@@ -6,6 +6,7 @@ from status import Status
 
 class JmpAbs(AbsoluteAddressing, Jmp):
     identifier_byte = bytes([0x4C])
+
     @classmethod
     def get_cycles(cls):
         return 3
@@ -13,6 +14,7 @@ class JmpAbs(AbsoluteAddressing, Jmp):
 
 class JmpInd(IndirectAddressing, Jmp):
     identifier_byte = bytes([0x6C])
+
     @classmethod
     def get_cycles(cls):
         return 5
@@ -20,6 +22,7 @@ class JmpInd(IndirectAddressing, Jmp):
 
 class JsrAbs(AbsoluteAddressing, Jsr):
     identifier_byte = bytes([0x20])
+
     @classmethod
     def get_cycles(cls):
         return 6

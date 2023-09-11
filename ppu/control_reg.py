@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from enum import Enum
 
+
 class PPUControlReg:
     """
     7  bit  0

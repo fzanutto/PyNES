@@ -12,7 +12,7 @@ class Sbc(Instruction):
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
-    def sub_carry(cpu, memory_address, dat_bytes, value):
+    def sub_carry(cpu, value):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
@@ -37,7 +37,7 @@ class Sbc(Instruction):
         value = cpu.bus.read_memory(memory_address)
         value = (~value) & 255
 
-        return cls.sub_carry(cpu, memory_address, data_bytes, value)
+        return cls.sub_carry(cpu, value)
 
 
 class SbcImm(ImmediateReadAddressing, Sbc):
@@ -48,7 +48,7 @@ class SbcImm(ImmediateReadAddressing, Sbc):
         value = super().get_data(cpu, memory_address, data_bytes)
         value = (~value) & 255
 
-        return super().sub_carry(cpu, memory_address, data_bytes, value)
+        return super().sub_carry(cpu, value)
 
 
 class SbcZeroPage(ZeroPageAddressing, Sbc):

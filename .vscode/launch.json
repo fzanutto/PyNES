@@ -6,7 +6,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["nestest.nes", "--debug"]
+            "args": ["roms/nestest.nes", "--debug"]
         },
         {
             "name": "Python SMB ROM",
@@ -14,7 +14,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["smb.nes"]
+            "args": ["roms/smb.nes", "--debug"]
         },
         {
             "name": "Python Balloon Fight ROM",
@@ -22,7 +22,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "args": ["balloonfight.nes"]
+            "args": ["roms/balloonfight.nes"]
         }
     ]
 }

@@ -157,10 +157,7 @@ class Lsr(WritesToMem, Instruction):
 
     def lsr(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
-
-        value = value >> 1
-
-        return value
+        return value >> 1
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
@@ -218,8 +215,7 @@ class Asl(WritesToMem, Instruction):
 
     def asl(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
-        value = (value << 1) & 255
-        return value
+        return (value << 1) & 255
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
@@ -287,9 +283,7 @@ class Ror(WritesToMem, Instruction):
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
 
-        value = (value >> 1) | (current_carry << 7)
-
-        return value
+        return (value >> 1) | (current_carry << 7)
 
 
 class RorImpl(ImplicitAddressing, Ror):
@@ -350,11 +344,9 @@ class Rol(WritesToMem, Instruction):
     def rol(cpu, value):
         current_carry = cpu.status_reg.bits[Status.StatusTypes.carry]
 
-        cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 1
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value >= (1 << 7)
 
-        value = ((value << 1) | current_carry) & 255
-
-        return value
+        return ((value << 1) | current_carry) & 255
 
 
 class RolImp(ImplicitAddressing, Rol):
@@ -363,7 +355,6 @@ class RolImp(ImplicitAddressing, Rol):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         value = cpu.a_reg
-
         return cls.rol(cpu, value)
 
     @classmethod

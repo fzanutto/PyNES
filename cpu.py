@@ -1,4 +1,3 @@
-from typing import Dict
 from time import time_ns
 from bus import Bus
 from instructions.generic_instructions import Instruction
@@ -40,8 +39,8 @@ class CPU:
 
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)
-        self.instructions: Dict[bytes, Instruction] = {}
-        self.run_count: Dict[bytes, int] = {}
+        self.instructions: dict[bytes, Instruction] = {}
+        self.run_count: dict[bytes, int] = {}
         for instruction in instructions_list:
             if instruction.identifier_byte in self.instructions.keys():
                 raise Exception('Duplicate instruction identifier bytes ' + instruction.identifier_byte.hex())

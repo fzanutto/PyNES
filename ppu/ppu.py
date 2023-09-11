@@ -146,7 +146,7 @@ class PPU(MemoryOwner):
             self.scroll_reg[self.scroll_reg_pointer] = value
             self.scroll_reg_pointer ^= 1
         elif position == 0x2006:
-            self.addr_reg[self.addr_reg_pointer] = value % 0xFF
+            self.addr_reg[self.addr_reg_pointer] = value & 0xFF
             self.addr_reg_pointer ^= 1
         elif position == 0x2007:
             self.write_to_data(value)

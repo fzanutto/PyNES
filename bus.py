@@ -13,7 +13,8 @@ class Bus:
         self.ppu = ppu
         self.io_regs = io_regs
         self.rom = rom
-        self.callback = None
+        self.update_ui_callback = None
+        self.joystick_input_callback = None
 
         self.memory_owners: list[MemoryOwner] = [
             self.ram,
@@ -65,50 +66,9 @@ class Bus:
         new_nmi_state = self.ppu.nmi_interrupt
 
         if not current_nmi_state and new_nmi_state:
-            self.callback()
+            self.update_ui_callback()
 
-        self.handle_joystick_input()
+        self.joystick_input_callback()
 
     def get_nmi_status(self):
         return self.ppu.get_and_update_nmi()
-    
-    def handle_joystick_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.UP
-                elif event.key == pygame.K_LEFT:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.LEFT
-                elif event.key == pygame.K_DOWN:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.DOWN
-                elif event.key == pygame.K_RIGHT:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.RIGHT
-                elif event.key == pygame.K_z:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.BUTTON_A
-                elif event.key == pygame.K_x:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.BUTTON_B
-                elif event.key == pygame.K_a:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.START
-                elif event.key == pygame.K_s:
-                    self.io_regs.joypad1.button_status |= Joypad.JoypadButton.SELECT
-
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.UP
-                elif event.key == pygame.K_LEFT:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.LEFT
-                elif event.key == pygame.K_DOWN:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.DOWN
-                elif event.key == pygame.K_RIGHT:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.RIGHT
-                elif event.key == pygame.K_z:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.BUTTON_A
-                elif event.key == pygame.K_x:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.BUTTON_B
-                elif event.key == pygame.K_a:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.START
-                elif event.key == pygame.K_s:
-                    self.io_regs.joypad1.button_status &= 0xFF - Joypad.JoypadButton.SELECT
-
-            elif event.type == pygame.QUIT:
-                sys.exit()

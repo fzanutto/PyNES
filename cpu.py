@@ -41,12 +41,14 @@ class CPU:
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)
         self.instructions: Dict[bytes, Instruction] = {}
+        self.run_count: Dict[bytes, int] = {}
         for instruction in instructions_list:
             if instruction.identifier_byte in self.instructions.keys():
                 raise Exception('Duplicate instruction identifier bytes ' + instruction.identifier_byte.hex())
             self.instructions[instruction.identifier_byte] = instruction
+            self.run_count[instruction.identifier_byte] = 0
 
-    def start_up(self, callback):
+    def start_up(self, update_ui_callback, handle_input_callback):
         """
         set the initial values of cpu registers
         status reg: 000100 (irqs disabled)
@@ -57,7 +59,8 @@ class CPU:
         $4000-$400F: 0 (sound registers)
         """
 
-        self.bus.callback = callback
+        self.bus.update_ui_callback = update_ui_callback
+        self.bus.joystick_input_callback = handle_input_callback
 
         self.pc_reg = 0
         self.status_reg = Status()  # know as 'P' on NesDev Wiki
@@ -111,8 +114,9 @@ class CPU:
             # get the current byte at pc
             identifier_byte = bytes([self.bus.read_memory(self.pc_reg)])
 
+            self.run_count[identifier_byte] += 1
             # turn the byte into an Instruction
-            instruction = self.instructions.get(identifier_byte)
+            instruction: Instruction = self.instructions.get(identifier_byte)
 
             # get the data bytes
             data_bytes = self.bus.read_memory_bytes(self.pc_reg + 1, instruction.data_length)
@@ -134,12 +138,14 @@ class CPU:
 
             cur_time = time_ns()
 
+            # print('time spent this cpu instruction: {} - {}'.format((cur_time - last_time) / 10**9, instruction))
+
             if self.debug and cur_time - last_time > 0:
-                print('time for updating ppu', cur_time - last_time)
+                print('time spent this cpu instruction', (cur_time - last_time) / 10**9)
 
             last_time = cur_time
 
-    def debug_print(self, pc_reg: int, identifier_byte, data_bytes, instruction):
+    def debug_print(self, pc_reg: int, identifier_byte, data_bytes, instruction: Instruction):
         # print out diagnostic information
         # example: C000  4C F5 C5  JMP $C5F5      A:00 X:00 Y:00 P:24 SP:FD PPU:  0,  0 CYC:
 

@@ -76,8 +76,9 @@ class PPU(MemoryOwner):
         return self.addr_reg[0] << 8 | self.addr_reg[1]
 
     def mirror_ram_addr(self, addr: int) -> int:
-        mirrored_ram = addr & 0b10111111111111 # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
+        mirrored_ram = addr & 0b00101111_11111111 # mirror down 0x3000-0x3eff to 0x2000 - 0x2eff
         ram_index = mirrored_ram - 0x2000
+        
         name_table = ram_index // 0x400
 
         if self.mirror_mode == 0:  # horizontal
@@ -219,7 +220,7 @@ class PPU(MemoryOwner):
 
         table_index = row // 4 * 8 + column // 4
         
-        # bug: attribute table on last index is probably not being updated
+        # bug: attribute table on last index is probably not being updated correctly
         # print(attribute_table[-1])
         byte = attribute_table[table_index]
 
@@ -296,7 +297,7 @@ class PPU(MemoryOwner):
         elif scroll_y > 0:
             self.render_nametable(frame, bank, second_nametable, [0, 0, 256, scroll_y], 0, 240-scroll_y)
 
-    def render_nametable(self, frame: Frame, bank: bool, nametable: list[int], rect: tuple[4], shift_x: int, shift_y: int):
+    def render_nametable(self, frame: Frame, bank: bool, nametable: list[int], rect: list[int], shift_x: int, shift_y: int):
         attribute_table = nametable[0x3c0:]
 
         bank_index = 0x1000 if bank else 0
@@ -325,7 +326,7 @@ class PPU(MemoryOwner):
                     pixel_x = tile_column * 8 + x
                     pixel_y = tile_row * 8 + y
 
-                    if pixel_x >= rect[0] and pixel_x < rect[2] and pixel_y >= rect[1] and pixel_y < rect[3]:
+                    if rect[0] <= pixel_x < rect[2] and rect[1] <= pixel_y < rect[3]:
                         frame.set_pixel(shift_x + pixel_x, shift_y + pixel_y, rgb)
 
     def render_sprites(self, frame: Frame, sprite16: bool):
@@ -353,7 +354,7 @@ class PPU(MemoryOwner):
                     upper = upper >> 1
                     lower = lower >> 1
 
-                    rgb = (0,0,0)
+                    rgb = (0, 0, 0)
                     if value == 0:
                         continue
                     elif value == 1:

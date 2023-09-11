@@ -44,9 +44,9 @@ def main():
     # create cpu
     cpu = CPU(bus, args.debug, args.nestest)
     
-    ui = UI(cpu, ppu)
+    ui = UI(ppu, io_regs, cpu)
 
-    cpu.start_up(ui.handle_and_update_ui)
+    cpu.start_up(ui.update_ui_callback, ui.handle_joystick_input)
     cpu.run_rom(rom)
 
 

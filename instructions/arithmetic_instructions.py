@@ -16,19 +16,15 @@ class Sbc(Instruction):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
-        sub = cpu.a_reg + value + \
-            int(cpu.status_reg.bits[Status.StatusTypes.carry])
+        sub = cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry])
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = sub > 255
 
-        sub = sub % 256
+        sub &= 0xFF
 
         is_sum_positive = sub < 128
 
-        if is_first_number_positive == is_second_number_positive:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive != is_sum_positive
-        else:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = False
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive == is_second_number_positive and is_first_number_positive != is_sum_positive
 
         return sub
 
@@ -87,23 +83,19 @@ class Adc(Instruction):
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
-    def add_carry(cpu, memory_address, dat_bytes, value):
+    def add_carry(cpu, value):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
-        sum = cpu.a_reg + value + \
-            int(cpu.status_reg.bits[Status.StatusTypes.carry])
+        sum = cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry])
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = sum > 255
 
-        sum = sum % 256
+        sum &= 0xFF
 
         is_sum_positive = sum < 128
 
-        if is_first_number_positive == is_second_number_positive:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive != is_sum_positive
-        else:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = False
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive == is_second_number_positive and is_first_number_positive != is_sum_positive
 
         return sum
 
@@ -111,7 +103,7 @@ class Adc(Instruction):
     def get_data(cls, cpu, memory_address, data_bytes):
         value = cpu.bus.read_memory(memory_address)
 
-        return cls.add_carry(cpu, memory_address, data_bytes, value)
+        return cls.add_carry(cpu, value)
 
 
 class AdcImm(ImmediateReadAddressing, Adc):
@@ -121,7 +113,7 @@ class AdcImm(ImmediateReadAddressing, Adc):
     def get_data(cls, cpu, memory_address, data_bytes):
         value = super().get_data(cpu, memory_address, data_bytes)
 
-        return super().add_carry(cpu, memory_address, data_bytes, value)
+        return super().add_carry(cpu, value)
 
 
 class AdcIdxInd(IndexedIndirectAddressing, Adc):
@@ -160,7 +152,7 @@ class Iny(ImplicitAddressing, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return (cpu.y_reg + 1) % 256
+        return (cpu.y_reg + 1) & 0xFF
 
     @classmethod
     def write(cls, cpu, memory_address, value):
@@ -175,7 +167,7 @@ class Dey(ImplicitAddressing, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.y_reg - 1 if cpu.y_reg > 0 else 255
+        return (cpu.y_reg - 1) & 0xFF
 
     @classmethod
     def write(cls, cpu, memory_address, value):
@@ -190,7 +182,7 @@ class Inx(ImplicitAddressing, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return (cpu.x_reg + 1) % 256
+        return (cpu.x_reg + 1) & 0xFF
 
     @classmethod
     def write(cls, cpu, memory_address, value):
@@ -205,7 +197,7 @@ class Dex(ImplicitAddressing, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return cpu.x_reg - 1 if cpu.x_reg > 0 else 255
+        return (cpu.x_reg - 1) & 0xFF
 
     @classmethod
     def write(cls, cpu, memory_address, value):
@@ -218,7 +210,7 @@ class Inc(WritesToMem, Instruction):
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
-        return (cpu.bus.read_memory(memory_address) + 1) % 256
+        return (cpu.bus.read_memory(memory_address) + 1) & 0xFF
 
 
 class IncZeroPage(ZeroPageAddressing, Inc):
@@ -260,7 +252,7 @@ class Dec(WritesToMem, Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
         value = cpu.bus.read_memory(memory_address)
-        return value - 1 if value > 0 else 255
+        return (value - 1) & 0xFF
 
 
 class DecZeroPage(ZeroPageAddressing, Dec):

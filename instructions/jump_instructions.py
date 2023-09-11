@@ -50,10 +50,13 @@ class Rti(ImplicitAddressing, Instruction):
     @classmethod
     def write(cls, cpu, memory_address, value):
         status_reg_value = cpu.pull_from_stack(1)
-        bits_4_5 = cpu.status_reg.to_int() & ((1 << 5) | (1 << 4))
-        remove_bits_4_5 = (~((1 << 5) | (1 << 4))) & 255
-        cpu.status_reg.from_int(
-            (status_reg_value & remove_bits_4_5) | bits_4_5)
+
+        bit4 = cpu.status_reg.bits[Status.StatusTypes.break1]
+        bit5 = cpu.status_reg.bits[Status.StatusTypes.break2]
+
+        cpu.status_reg.from_int(status_reg_value)
+        cpu.status_reg.bits[Status.StatusTypes.break1] = bit4
+        cpu.status_reg.bits[Status.StatusTypes.break2] = bit5
 
         cpu.pc_reg = cpu.pull_from_stack(2)
 

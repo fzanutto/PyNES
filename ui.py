@@ -93,8 +93,5 @@ class UI:
 
             elif event.type == pygame.QUIT:
                 self.cpu.running = False
-                for byte in self.cpu.run_count:
-                    instruction = self.cpu.instructions[byte]
-                    print(instruction, self.cpu.run_count[byte])
                 sys.exit()
         

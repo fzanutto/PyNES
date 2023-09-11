@@ -28,6 +28,7 @@ class StaAbs(AbsoluteAddressing, Sta):
     def get_cycles(cls):
         return 4
 
+
 class StaAbsWithX(AbsoluteAddressingWithX, Sta):
     identifier_byte = bytes([0x9D])
 

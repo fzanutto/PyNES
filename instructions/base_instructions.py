@@ -84,18 +84,12 @@ class Sty(WritesToMem, Instruction):
 
 
 class SetBit(ImplicitAddressing, Instruction):
-    """
-    sets a bit to be True
-    """
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[cls.bit] = True
 
 
 class ClearBit(ImplicitAddressing, Instruction):
-    """
-    sets a bit to be False
-    """
     @classmethod
     def apply_side_effects(cls, cpu, memory_address, value):
         cpu.status_reg.bits[cls.bit] = False

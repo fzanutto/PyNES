@@ -54,7 +54,6 @@ class PPUControlReg:
         for i in self.bits:
             self.bits[i] = (value & (1 << i.value)) > 0
 
-
     def get_nametable_addr(self):
         nametable_bits = self.to_int() & 0b11
         # (0 = $2000; 1 = $2400; 2 = $2800; 3 = $2C00)

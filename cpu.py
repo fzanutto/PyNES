@@ -21,7 +21,7 @@ class CPU:
         self.bus = bus
         self.debug = debug
         self.nes_test = nes_test
-        self.cycle = 7 # debug variable to use nestest
+        self.cycle = 7  # debug variable to use nestest
         
         # status register: store a single byte
         self.status_reg: Status = Status()
@@ -40,12 +40,10 @@ class CPU:
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)
         self.instructions: dict[bytes, Instruction] = {}
-        self.run_count: dict[bytes, int] = {}
         for instruction in instructions_list:
             if instruction.identifier_byte in self.instructions.keys():
                 raise Exception('Duplicate instruction identifier bytes ' + instruction.identifier_byte.hex())
             self.instructions[instruction.identifier_byte] = instruction
-            self.run_count[instruction.identifier_byte] = 0
 
     def start_up(self, update_ui_callback, handle_input_callback):
         """
@@ -113,7 +111,6 @@ class CPU:
             # get the current byte at pc
             identifier_byte = bytes([self.bus.read_memory(self.pc_reg)])
 
-            self.run_count[identifier_byte] += 1
             # turn the byte into an Instruction
             instruction: Instruction = self.instructions.get(identifier_byte)
 

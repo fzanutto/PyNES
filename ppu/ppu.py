@@ -216,12 +216,12 @@ class PPU(MemoryOwner):
         return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[
             PPUMaskReg.StatusTypes.show_sprites] and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]
 
-    def get_background_palette(self, column: int, row: int, attribute_table: list[int]):
+    def get_background_palette(self, column: int, row: int, attribute_table_addr: int):
         # https://www.nesdev.org/wiki/PPU_attribute_tables
 
         table_index = row // 4 * 8 + column // 4
 
-        byte = attribute_table[table_index]
+        byte = self.ram[attribute_table_addr + table_index]
 
         tile_column = (column % 4) // 2
         tile_row = (row % 4) // 2
@@ -269,62 +269,61 @@ class PPU(MemoryOwner):
 
         vertical_mirror = self.mirror_mode == 1
 
-        main_nametable = None
-        second_nametable = None
+        main_nametable_addr = None
+        second_nametable_addr = None
 
         if vertical_mirror:  # SMB is vertical mirror
             if nametable_address in [0x2000, 0x2800]:
-                main_nametable = self.ram[0: 0x400]
-                second_nametable = self.ram[0x400: 0x800]
+                main_nametable_addr = 0
+                second_nametable_addr = 0x400
             elif nametable_address in [0x2400, 0x2C00]:
-                main_nametable = self.ram[0x400: 0x800]
-                second_nametable = self.ram[0: 0x400]
+                main_nametable_addr = 0x400
+                second_nametable_addr = 0
         else:
             if nametable_address in [0x2000, 0x2400]:
-                main_nametable = self.ram[0: 0x400]
-                second_nametable = self.ram[0x400: 0x800]
+                main_nametable_addr = self.ram[0: 0x400]
+                second_nametable_addr = 0x400
             elif nametable_address in [0x2800, 0x2C00]:
-                main_nametable = self.ram[0x400: 0x800]
-                second_nametable = self.ram[0: 0x400]
+                main_nametable_addr = 0x400
+                second_nametable_addr = 0
 
         bank = self.control_reg.bits[PPUControlReg.StatusTypes.background_pattern_addr]
 
-        self.render_nametable(frame, bank, main_nametable, [scroll_x, scroll_y, 256, 240], -scroll_x, -scroll_y)
+        self.render_nametable(frame, bank, main_nametable_addr, [scroll_x, scroll_y, 256, 240], -scroll_x, -scroll_y)
 
         if scroll_x > 0:
-            self.render_nametable(frame, bank, second_nametable, [0, 0, scroll_x, 240], 256 - scroll_x, 0)
+            self.render_nametable(frame, bank, second_nametable_addr, [0, 0, scroll_x, 240], 256 - scroll_x, 0)
         elif scroll_y > 0:
-            self.render_nametable(frame, bank, second_nametable, [0, 0, 256, scroll_y], 0, 240 - scroll_y)
+            self.render_nametable(frame, bank, second_nametable_addr, [0, 0, 256, scroll_y], 0, 240 - scroll_y)
 
-    def render_nametable(self, frame: Frame, bank: bool, nametable: list[int], rect: list[int], shift_x: int, shift_y: int):
-        attribute_table = nametable[0x3c0:]
+    def render_nametable(self, frame: Frame, bank: bool, nametable_start_addr: int, rect: list[int], shift_x: int, shift_y: int):
+        attribute_table_addr = nametable_start_addr + 0x3c0
 
         bank_index = 0x1000 if bank else 0
-        for i in range(30 * 32):
-            tile_index = self.ram[i]
 
-            tile_column = i % 32
-            tile_row = i // 32
+        for tile_row in range(rect[1] // 8, (rect[3] // 8) + 1):
+            for tile_column in range(rect[0] // 8, (rect[2] // 8) + 1):
+                tile_index = self.ram[tile_row * 32 + tile_column]
 
-            start_position = bank_index + tile_index * 16
-            palette_indexes = self.get_background_palette(tile_column, tile_row, attribute_table)
+                start_position = bank_index + tile_index * 16
+                palette_indexes = self.get_background_palette(tile_column, tile_row, attribute_table_addr)
 
-            for y in range(8):
-                upper = self.chr_rom[start_position + y]
-                lower = self.chr_rom[start_position + y + 8]
+                for y in range(8):
+                    upper = self.chr_rom[start_position + y]
+                    lower = self.chr_rom[start_position + y + 8]
 
-                for x in range(7, -1, -1):
-                    value = ((1 & lower) << 1) | (1 & upper)
-                    upper = upper >> 1
-                    lower = lower >> 1
+                    for x in range(7, -1, -1):
+                        value = ((1 & lower) << 1) | (1 & upper)
+                        upper = upper >> 1
+                        lower = lower >> 1
 
-                    rgb = PPU.SYSTEM_PALLETE[palette_indexes[value]]
+                        rgb = PPU.SYSTEM_PALLETE[palette_indexes[value]]
 
-                    pixel_x = tile_column * 8 + x
-                    pixel_y = tile_row * 8 + y
+                        pixel_x = tile_column * 8 + x
+                        pixel_y = tile_row * 8 + y
 
-                    if rect[0] <= pixel_x < rect[2] and rect[1] <= pixel_y < rect[3]:
-                        frame.set_pixel(shift_x + pixel_x, shift_y + pixel_y, rgb)
+                        if rect[0] <= pixel_x < rect[2] and rect[1] <= pixel_y < rect[3]:
+                            frame.set_pixel(shift_x + pixel_x, shift_y + pixel_y, rgb)
 
     def render_sprites(self, frame: Frame, sprite16: bool):
         bank = 0x1000 if self.control_reg.bits[PPUControlReg.StatusTypes.sprite_pattern_addr] else 0

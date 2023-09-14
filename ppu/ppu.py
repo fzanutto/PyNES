@@ -312,17 +312,21 @@ class PPU(MemoryOwner):
                     upper = self.chr_rom[start_position + y]
                     lower = self.chr_rom[start_position + y + 8]
 
+                    pixel_y = tile_row * 8 + y
+
+                    if not (rect[1] <= pixel_y < rect[3]):
+                        continue
+
                     for x in range(7, -1, -1):
                         value = ((1 & lower) << 1) | (1 & upper)
-                        upper = upper >> 1
-                        lower = lower >> 1
+                        upper >>= 1
+                        lower >>= 1
 
                         rgb = PPU.SYSTEM_PALLETE[palette_indexes[value]]
 
                         pixel_x = tile_column * 8 + x
-                        pixel_y = tile_row * 8 + y
 
-                        if rect[0] <= pixel_x < rect[2] and rect[1] <= pixel_y < rect[3]:
+                        if rect[0] <= pixel_x < rect[2]:
                             frame.set_pixel(shift_x + pixel_x, shift_y + pixel_y, rgb)
 
     def render_sprites(self, frame: Frame, sprite16: bool):
@@ -336,8 +340,8 @@ class PPU(MemoryOwner):
             flip_vertical = self.oam_data[i + 2] >> 7 & 1
             flip_horizontal = self.oam_data[i + 2] >> 6 & 1
 
-            pallete_index = self.oam_data[i + 2] & 0b11
-            sprite_pallete = self.get_sprite_palette(pallete_index)
+            palette_index = self.oam_data[i + 2] & 0b11
+            sprite_palette = self.get_sprite_palette(palette_index)
 
             start_position = bank + tile_index * 16
 
@@ -345,27 +349,28 @@ class PPU(MemoryOwner):
                 upper = self.chr_rom[start_position + y]
                 lower = self.chr_rom[start_position + y + 8]
 
+                final_y = tile_y + y
+                if flip_vertical:
+                    final_y = tile_y + 7 - y
+
                 for x in range(7, -1, -1):
                     value = ((1 & lower) << 1) | (1 & upper)
-                    upper = upper >> 1
-                    lower = lower >> 1
+                    upper >>= 1
+                    lower >>= 1
 
                     rgb = (0, 0, 0)
                     if value == 0:
                         continue
                     elif value == 1:
-                        rgb = PPU.SYSTEM_PALLETE[sprite_pallete[1]]
+                        rgb = PPU.SYSTEM_PALLETE[sprite_palette[1]]
                     elif value == 2:
-                        rgb = PPU.SYSTEM_PALLETE[sprite_pallete[2]]
+                        rgb = PPU.SYSTEM_PALLETE[sprite_palette[2]]
                     elif value == 3:
-                        rgb = PPU.SYSTEM_PALLETE[sprite_pallete[3]]
+                        rgb = PPU.SYSTEM_PALLETE[sprite_palette[3]]
 
                     final_x = tile_x + x
-                    final_y = tile_y + y
+
                     if flip_horizontal:
                         final_x = tile_x + 7 - x
-
-                    if flip_vertical:
-                        final_y = tile_y + 7 - y
 
                     frame.set_pixel(final_x, final_y, rgb)

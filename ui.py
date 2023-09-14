@@ -42,10 +42,7 @@ class UI:
                     self.screen.blit(self.square, draw)
 
         self.last_frame.data = self.frame.data[:]
-
-        b = time_ns()
         pygame.display.flip()
-        # print("DISPLAY FLIP:", (time_ns() - b) / 10**9)
 
         current_time = time_ns()
         diff = current_time - self.last_frame_time

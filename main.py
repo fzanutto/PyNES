@@ -7,6 +7,7 @@ from ppu.ppu import PPU
 from rom import ROM
 from ui import UI
 
+
 def main():
     # set up command line argument parser
     parser = argparse.ArgumentParser(description='NES Emulator.')

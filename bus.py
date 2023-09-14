@@ -7,6 +7,7 @@ import pygame
 import sys
 from joypad import Joypad
 
+
 class Bus:
     def __init__(self, ram: RAM, ppu: PPU, io_regs: IO_Registers, rom: ROM):
         self.ram = ram
@@ -24,15 +25,14 @@ class Bus:
         ]
 
     def get_memory_owner(self, location: int):
-        """
-        return the owner of a memory location
-        """
-        # check if memory owner
-        for memory_owner in self.memory_owners:
-            if memory_owner.memory_start_location <= location <= memory_owner.memory_end_location:
-                return memory_owner
-
-        raise Exception('Cannot find memory owner', location)
+        if location <= 0x1FFF:
+            return self.ram
+        elif location <= 0x3FFF:
+            return self.ppu
+        elif location <= 0x401F:
+            return self.io_regs
+        else:
+            return self.rom
 
     def read_memory(self, position: int):
         mem_owner = self.get_memory_owner(position)
@@ -66,9 +66,8 @@ class Bus:
         new_nmi_state = self.ppu.nmi_interrupt
 
         if not current_nmi_state and new_nmi_state:
+            self.joystick_input_callback()
             self.update_ui_callback()
-
-        self.joystick_input_callback()
 
     def get_nmi_status(self):
         return self.ppu.get_and_update_nmi()

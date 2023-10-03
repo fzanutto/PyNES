@@ -42,9 +42,6 @@ class Bus:
         mem_owner = self.get_memory_owner(position)
         value = mem_owner.get_bytes(position, size)
 
-        if type(value) is list and len(value) > 0 and type(value[0]) is bytes:
-            value = b''.join(value)
-
         return bytes(value)
 
     def write_memory(self, position: int, value: int, num_bytes: int = 1):

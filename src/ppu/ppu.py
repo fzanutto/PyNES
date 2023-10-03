@@ -1,8 +1,8 @@
-from frame import Frame
-from memory_owner import MemoryOwner
-from ppu.control_reg import PPUControlReg
-from ppu.mask_reg import PPUMaskReg
-from ppu.status_reg import PPUStatusReg
+from src.frame import Frame
+from src.memory_owner import MemoryOwner
+from src.ppu.control_reg import PPUControlReg
+from src.ppu.mask_reg import PPUMaskReg
+from src.ppu.status_reg import PPUStatusReg
 
 
 class PPU(MemoryOwner):
@@ -219,7 +219,7 @@ class PPU(MemoryOwner):
     def get_background_palette(self, column: int, row: int, attribute_table_addr: int):
         # https://www.nesdev.org/wiki/PPU_attribute_tables
 
-        table_index = row // 4 * 8 + column // 4
+        table_index = row // 4 * 8 + ((column // 4) & 0b111)
 
         byte = self.ram[attribute_table_addr + table_index]
 
@@ -292,8 +292,10 @@ class PPU(MemoryOwner):
         self.render_nametable(frame, bank, main_nametable_addr, [scroll_x, scroll_y, 256, 240], -scroll_x, -scroll_y)
 
         if scroll_x > 0:
+            print("SCROLL X:", scroll_x)
             self.render_nametable(frame, bank, second_nametable_addr, [0, 0, scroll_x, 240], 256 - scroll_x, 0)
         elif scroll_y > 0:
+            print("SCROLL Y:", scroll_y)
             self.render_nametable(frame, bank, second_nametable_addr, [0, 0, 256, scroll_y], 0, 240 - scroll_y)
 
     def render_nametable(self, frame: Frame, bank: bool, nametable_start_addr: int, rect: list[int], shift_x: int, shift_y: int):

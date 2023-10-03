@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from enum import Enum
 
+
 class PPUMaskReg:
     """
     7  bit  0

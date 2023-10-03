@@ -406,9 +406,9 @@ class Sre(Instruction):
         cpu.a_reg = value
 
     def lsr(cpu, value):
-        cpu.status_reg.bits[Status.StatusTypes.carry] = value & 0x1
+        cpu.status_reg.bits[Status.StatusTypes.carry] = value & 1
 
-        value = value >> 1
+        value >>= 1
 
         return value
 

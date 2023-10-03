@@ -22,6 +22,7 @@ class CPU:
         self.debug = debug
         self.nes_test = nes_test
         self.cycle = 7  # debug variable to use nestest
+        self.reset_vector = 0xC000
         
         # status register: store a single byte
         self.status_reg: Status = Status()
@@ -87,7 +88,11 @@ class CPU:
 
     def run_rom(self, rom: ROM):
         self.rom = rom
-        self.pc_reg = 0xC000 if self.nes_test else 0x8000  # first rom address
+
+        if not self.nes_test:
+            self.reset_vector = int.from_bytes(self.bus.read_memory_bytes(0xFFFC, 2), byteorder='little')
+
+        self.pc_reg = self.reset_vector
 
         # run program
         self.running = True

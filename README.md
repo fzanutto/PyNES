@@ -25,9 +25,10 @@ Recordings of all streams are available on PyAndy's [YouTube](https://www.youtub
   - <img src="res/balloon.png" alt="Balloon Fight first level" style="height: 100px; width:100px;"/>
 - Popeye
   - seems playable
-  - <img src="res/pacman.png" alt="Pac-Man first level" style="height: 100px; width:100px;"/>
+  - <img src="res/popeye.png" alt="Popeye first level" style="height: 100px; width:100px;"/>
 - Pac-Man
-  - as scrolling is not working, title screen is buggy, but game seems playable 
+  - as scrolling is not working, title screen is buggy, but game seems playable
+  - <img src="res/pacman.png" alt="Pac-Man first level" style="height: 100px; width:100px;"/>
 
 # Useful Links
 - [Nesdev Wiki](http://wiki.nesdev.com/w/index.php/Nesdev_Wiki)

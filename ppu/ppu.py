@@ -281,7 +281,7 @@ class PPU(MemoryOwner):
                 second_nametable_addr = 0
         else:
             if nametable_address in [0x2000, 0x2400]:
-                main_nametable_addr = self.ram[0: 0x400]
+                main_nametable_addr = 0
                 second_nametable_addr = 0x400
             elif nametable_address in [0x2800, 0x2C00]:
                 main_nametable_addr = 0x400

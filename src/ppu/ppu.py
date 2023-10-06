@@ -3,7 +3,6 @@ from src.memory_owner import MemoryOwner
 from src.ppu.control_reg import PPUControlReg
 from src.ppu.mask_reg import PPUMaskReg
 from src.ppu.status_reg import PPUStatusReg
-from time import time_ns
 
 
 class PPU(MemoryOwner):
@@ -213,20 +212,8 @@ class PPU(MemoryOwner):
     def is_sprite_0_hit(self) -> bool:
         y = self.oam_data[0]
         x = self.oam_data[3]
-
-        if (y != self.scanline
-                or x == 255
-                or self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]
-                or self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]
-                or (0 <= x <= 7 and (self.mask_reg.bits[PPUMaskReg.StatusTypes.sprites_left] or self.mask_reg.bits[PPUMaskReg.StatusTypes.background_left]))):
-            return False
-
-        for x in range(8):
-            for y in range(8):
-                # TODO: implement sprite background check
-                return True
-        else:
-            return False
+        return y == self.scanline and x <= self.current_cycle and self.mask_reg.bits[
+            PPUMaskReg.StatusTypes.show_sprites] and self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]
 
     def get_background_palette(self, column: int, row: int, attribute_table_addr: int):
         # https://www.nesdev.org/wiki/PPU_attribute_tables
@@ -269,15 +256,11 @@ class PPU(MemoryOwner):
     def render(self, frame: Frame):
         frame.pixels_to_update = []
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]:
-            background_time = time_ns()
             self.render_background(frame)
-            print("Background time:", (time_ns() - background_time) / 10**9)
 
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_sprites]:
-            sprite_time = time_ns()
             sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
             self.render_sprites(frame, sprite_16_8)
-            print("Sprite time:", (time_ns() - sprite_time) / 10**9)
 
     def render_background(self, frame: Frame):
         nametable_address = self.control_reg.get_nametable_addr()
@@ -349,7 +332,7 @@ class PPU(MemoryOwner):
     def render_sprites(self, frame: Frame, sprite16: bool):
         bank = 0x1000 if self.control_reg.bits[PPUControlReg.StatusTypes.sprite_pattern_addr] else 0
 
-        for i in range(256 - 4, -1, -4):
+        for i in range(len(self.oam_data) - 4, -1, -4):
             tile_index = self.oam_data[i + 1]
             tile_x = self.oam_data[i + 3]
             tile_y = self.oam_data[i]

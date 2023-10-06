@@ -255,6 +255,7 @@ class PPU(MemoryOwner):
         ]
 
     def render(self, frame: Frame):
+        frame.pixels_to_update = []
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]:
             self.render_background(frame)
 

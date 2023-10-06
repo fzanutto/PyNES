@@ -17,7 +17,6 @@ class UI:
         self.ppu = ppu
         self.cpu = cpu
         self.frame = Frame()
-        self.last_frame = Frame()
         self.screen = pygame.display.set_mode(size)
         self.square = pygame.Surface((PIXEL_SCALE, PIXEL_SCALE))
         self.update_ui_callback = self.update_ui
@@ -32,19 +31,14 @@ class UI:
 
         screen_time = time_ns()
 
-        for x in range(Frame.WIDTH):
-            for y in range(Frame.HEIGHT):
-                color_index = y * Frame.WIDTH + x
-                new_color = self.frame.data[color_index]
-                old_color = self.last_frame.data[color_index]
+        for pixel in self.frame.pixels_to_update:
+            x = pixel[0]
+            y = pixel[1]
+            new_color = pixel[2]
+            draw = pygame.Rect((x * PIXEL_SCALE) + 1, (y * PIXEL_SCALE) + 1, PIXEL_SCALE, PIXEL_SCALE)
+            pygame.draw.rect(self.screen, new_color, draw)
 
-                if new_color != old_color:
-                    self.square.fill(new_color)
-                    draw = pygame.Rect((x * PIXEL_SCALE) + 1, (y * PIXEL_SCALE) + 1, PIXEL_SCALE, PIXEL_SCALE)
-                    self.screen.blit(self.square, draw)
-
-        self.last_frame.data = self.frame.data[:]
-        pygame.display.flip()
+        pygame.display.update()
 
         current_time = time_ns()
         diff = current_time - self.last_frame_time

@@ -192,7 +192,7 @@ class PPU(MemoryOwner):
             self.oam_address_reg = 0
 
         if self.current_cycle >= 341:
-            if self.is_sprite_0_hit():
+            if self.scanline < 241 and self.is_sprite_0_hit():
                 self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 1
 
             self.current_cycle %= 341
@@ -200,7 +200,6 @@ class PPU(MemoryOwner):
 
             if self.scanline == 241:
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 1
-                self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 0
                 if self.control_reg.bits[PPUControlReg.StatusTypes.vblank]:
                     self.nmi_interrupt = True
 

@@ -1,4 +1,4 @@
-from src.frame import Frame
+from src.gameframe import GameFrame
 from src.memory_owner import MemoryOwner
 from src.ppu.control_reg import PPUControlReg
 from src.ppu.mask_reg import PPUMaskReg
@@ -254,7 +254,7 @@ class PPU(MemoryOwner):
             self.palette_table[palette_start + 2]
         ]
 
-    def render(self, frame: Frame):
+    def render(self, frame: GameFrame):
         if self.mask_reg.bits[PPUMaskReg.StatusTypes.show_background]:
             self.render_background(frame)
 
@@ -262,7 +262,7 @@ class PPU(MemoryOwner):
             sprite_16_8 = self.control_reg.bits[PPUControlReg.StatusTypes.sprite_size]
             self.render_sprites(frame, sprite_16_8)
 
-    def render_background(self, frame: Frame):
+    def render_background(self, frame: GameFrame):
         nametable_address = self.control_reg.get_nametable_addr()
         scroll_x = self.scroll_reg[0]
         scroll_y = self.scroll_reg[1]
@@ -298,7 +298,7 @@ class PPU(MemoryOwner):
             print("SCROLL Y:", scroll_y)
             self.render_nametable(frame, bank, second_nametable_addr, [0, 0, 256, scroll_y], 0, 240 - scroll_y)
 
-    def render_nametable(self, frame: Frame, bank: bool, nametable_start_addr: int, rect: list[int], shift_x: int, shift_y: int):
+    def render_nametable(self, frame: GameFrame, bank: bool, nametable_start_addr: int, rect: list[int], shift_x: int, shift_y: int):
         attribute_table_addr = nametable_start_addr + 0x3c0
 
         bank_index = 0x1000 if bank else 0
@@ -331,7 +331,7 @@ class PPU(MemoryOwner):
                         if rect[0] <= pixel_x < rect[2]:
                             frame.set_pixel(shift_x + pixel_x, shift_y + pixel_y, rgb)
 
-    def render_sprites(self, frame: Frame, sprite16: bool):
+    def render_sprites(self, frame: GameFrame, sprite16: bool):
         bank = 0x1000 if self.control_reg.bits[PPUControlReg.StatusTypes.sprite_pattern_addr] else 0
 
         for i in range(len(self.oam_data) - 4, -1, -4):

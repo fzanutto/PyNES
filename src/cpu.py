@@ -3,6 +3,7 @@ from bus import Bus
 from instructions.generic_instructions import Instruction
 from rom import ROM
 from status import Status
+import threading
 
 import instructions.instructions as i_file
 import instructions.jump_instructions as j_file
@@ -17,6 +18,7 @@ import instructions.unofficial_instructions as u_file
 
 class CPU:
     def __init__(self, bus: Bus, debug: bool = False, nes_test: bool = False):
+        self.thread: threading.Thread = None
         self.rom = None
         self.bus = bus
         self.debug = debug
@@ -59,7 +61,9 @@ class CPU:
 
         self.bus.update_ui_callback = update_ui_callback
         self.bus.joystick_input_callback = handle_input_callback
+        self.reset()
 
+    def reset(self):
         self.pc_reg = 0
         self.status_reg = Status()  # know as 'P' on NesDev Wiki
         self.sp_reg = 0xFD
@@ -87,8 +91,13 @@ class CPU:
         return subclasses + [g for s in cls.__subclasses__() for g in self.find_instructions(s)]
 
     def run_rom(self, rom: ROM):
+        self.running = False
         self.rom = rom
+        self.thread = threading.Thread(target=self.run_rom_thread)
+        self.thread.daemon = True
+        self.thread.start()
 
+    def run_rom_thread(self):
         if not self.nes_test:
             self.reset_vector = int.from_bytes(self.bus.read_memory_bytes(0xFFFC, 2), byteorder='little')
 

@@ -62,7 +62,7 @@ class Bus:
         self.ppu.tick(cycles * 3)
         new_nmi_state = self.ppu.nmi_interrupt
 
-        if not current_nmi_state and new_nmi_state:
+        if not current_nmi_state and new_nmi_state and self.update_ui_callback is not None:
             self.joystick_input_callback()
             self.update_ui_callback()
 

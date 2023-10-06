@@ -26,9 +26,11 @@ class UI:
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
 
     def update_ui(self):
-        a = time_ns()
+        ppu_time = time_ns()
         self.ppu.render(self.frame)
-        print("PPU:",(time_ns() - a) / 10**9)
+        print("PPU:", (time_ns() - ppu_time) / 10**9)
+
+        screen_time = time_ns()
 
         for x in range(Frame.WIDTH):
             for y in range(Frame.HEIGHT):
@@ -47,8 +49,8 @@ class UI:
         current_time = time_ns()
         diff = current_time - self.last_frame_time
         self.last_frame_time = current_time
-        # print("update_ui total time: {}".format((time_ns() - a) / 10**9))
-        # print("FPS: {}. Time since last frame: {}".format(10**9 / diff, diff / 10**9))
+        print("update screen total time: {}".format((current_time - screen_time) / 10**9))
+        print("FPS: {}. Time since last frame: {}".format(10**9 / diff, diff / 10**9))
 
     def handle_joystick_input(self):
         for event in pygame.event.get():

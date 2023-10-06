@@ -8,8 +8,8 @@ from ppu.ppu import PPU
 from cpu import CPU
 
 PIXEL_SCALE = 4
-size = width, height = 256 * PIXEL_SCALE, 240 * PIXEL_SCALE
-
+size = width, height = 256, 240
+from numpy.random import random, randint
 
 class UI:
     def __init__(self, ppu: PPU, io_regs: IO_Registers, cpu: CPU):
@@ -26,29 +26,30 @@ class UI:
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
 
     def update_ui(self):
-        a = time_ns()
+        ppu_time = time_ns()
         self.ppu.render(self.frame)
-        print("PPU:",(time_ns() - a) / 10**9)
+        print("PPU:", (time_ns() - ppu_time) / 10**9)
 
-        for x in range(Frame.WIDTH):
-            for y in range(Frame.HEIGHT):
-                color_index = y * Frame.WIDTH + x
-                new_color = self.frame.data[color_index]
-                old_color = self.last_frame.data[color_index]
+        screen_time = time_ns()
+        pixels = pygame.surfarray.pixels3d(self.screen)
+        pixels[:, :, :] = self.frame.data
 
-                if new_color != old_color:
-                    self.square.fill(new_color)
-                    draw = pygame.Rect((x * PIXEL_SCALE) + 1, (y * PIXEL_SCALE) + 1, PIXEL_SCALE, PIXEL_SCALE)
-                    self.screen.blit(self.square, draw)
+        # for x in range(Frame.WIDTH):
+        #     for y in range(Frame.HEIGHT):
+        #         new_color = self.frame.data[x][y]
+        #         old_color = self.last_frame.data[x][y]
+        #
+        #         if new_color != old_color:
+        #             pixels[x, y] = new_color
+        del pixels
 
-        self.last_frame.data = self.frame.data[:]
         pygame.display.flip()
 
         current_time = time_ns()
         diff = current_time - self.last_frame_time
         self.last_frame_time = current_time
-        # print("update_ui total time: {}".format((time_ns() - a) / 10**9))
-        # print("FPS: {}. Time since last frame: {}".format(10**9 / diff, diff / 10**9))
+        print("update screen time: {}".format((current_time - screen_time) / 10**9))
+        print("FPS: {}. Time since last frame: {}".format(10**9 / diff, diff / 10**9))
 
     def handle_joystick_input(self):
         for event in pygame.event.get():

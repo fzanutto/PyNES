@@ -53,7 +53,7 @@ class Bus:
         mem_owner.set(position, value, num_bytes)
 
     def write_to_oam_dma(self, location: int):
-        for i in range(0xFF):
+        for i in range(0xFF + 1):
             value = self.read_memory((location << 8) | i)
             self.ppu.write_oam_data(value)
         

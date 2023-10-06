@@ -306,7 +306,7 @@ class PPU(MemoryOwner):
 
         for tile_row in range(rect[1] // 8, (rect[3] // 8) + 1):
             for tile_column in range(rect[0] // 8, (rect[2] // 8) + 1):
-                tile_index = self.ram[tile_row * 32 + tile_column]
+                tile_index = self.ram[tile_row * 32 + tile_column + nametable_start_addr]
 
                 start_position = bank_index + tile_index * 16
                 palette_indexes = self.get_background_palette(tile_column, tile_row, attribute_table_addr)

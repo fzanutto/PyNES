@@ -3,9 +3,6 @@ from memory_owner import MemoryOwner
 from ppu.ppu import PPU
 from ram import RAM
 from rom import ROM
-import pygame
-import sys
-from joypad import Joypad
 
 
 class Bus:
@@ -40,9 +37,7 @@ class Bus:
 
     def read_memory_bytes(self, position: int, size: int = 1) -> bytes:
         mem_owner = self.get_memory_owner(position)
-        value = mem_owner.get_bytes(position, size)
-
-        return bytes(value)
+        return mem_owner.get_bytes(position, size)
 
     def write_memory(self, position: int, value: int, num_bytes: int = 1):
         mem_owner = self.get_memory_owner(position)
@@ -53,16 +48,14 @@ class Bus:
         mem_owner.set(position, value, num_bytes)
 
     def write_to_oam_dma(self, location: int):
-        for i in range(0xFF + 1):
-            value = self.read_memory((location << 8) | i)
-            self.ppu.write_oam_data(value)
-        
-    def tick(self, cycles: int):
-        current_nmi_state = self.ppu.nmi_interrupt
-        self.ppu.tick(cycles * 3)
-        new_nmi_state = self.ppu.nmi_interrupt
+        data_to_write = self.read_memory_bytes(location << 8, 256)
 
-        if not current_nmi_state and new_nmi_state:
+        for i in range(0xFF + 1):
+            value = data_to_write[i]
+            self.ppu.write_oam_data(value)
+
+    def tick(self, cycles: int):
+        if self.ppu.tick(cycles * 3):
             self.joystick_input_callback()
             self.update_ui_callback()
 

@@ -185,7 +185,10 @@ class PPU(MemoryOwner):
     def update_mask_reg(self, value: int):
         self.mask_reg.from_int(value)
 
-    def tick(self, cycles: int):
+    def tick(self, cycles: int) -> bool:
+        """
+        returns bool indicating if PPU has entered vblank
+        """
         self.current_cycle += cycles
 
         if 257 <= self.current_cycle <= 320:
@@ -202,12 +205,15 @@ class PPU(MemoryOwner):
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 1
                 if self.control_reg.bits[PPUControlReg.StatusTypes.vblank]:
                     self.nmi_interrupt = True
+                return True
 
             elif self.scanline >= 262:
                 self.scanline = 0
                 self.status_reg.bits[PPUStatusReg.StatusTypes.sprite_0_hit] = 0
                 self.status_reg.bits[PPUStatusReg.StatusTypes.vblank] = 0
                 self.nmi_interrupt = False
+
+        return False
 
     def is_sprite_0_hit(self) -> bool:
         y = self.oam_data[0]

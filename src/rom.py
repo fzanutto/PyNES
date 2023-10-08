@@ -5,8 +5,6 @@ KB_SIZE = 1024
 
 class ROM(MemoryOwner):
     # rom memory is duplicated around 0xC000
-    memory_start_location = 0x8000
-    memory_end_location = 0xFFFF
 
     def __init__(self, rom_bytes: bytes):
         self.header_size = 0x10  # 16 bytes
@@ -26,7 +24,8 @@ class ROM(MemoryOwner):
         self.ines_version = control_byte_2 & 0b1100
 
         if self.ines_version != 0:
-            raise Exception("iNES version not supported yet")
+            pass
+            #raise Exception("iNES version not supported yet")
 
         # control byte 1 container 4 lower bits and control byte 2 contain 4 upper bits of mapper type
         self.rom_mapper_type = (control_byte_2 & 0b1111_0000) | (control_byte_1 >> 4)
@@ -34,27 +33,14 @@ class ROM(MemoryOwner):
         prg_start = self.header_size + (0 if not self.contains_trainer else 512)
         prg_end = prg_start + (16 * KB_SIZE * self.num_prg_blocks)
 
-        self.prg_bytes = rom_bytes[prg_start: prg_end]
+        prg_bytes = rom_bytes[prg_start: prg_end]
+
+        if self.num_prg_blocks == 1:
+            self.prg_bytes = prg_bytes + prg_bytes
+
+        super().__init__(0x8000, 0xFFFF)
+        self.memory = prg_bytes
         self.chr_rom = rom_bytes[prg_end: prg_end + (8 * KB_SIZE * self.num_chr_rom_blocks)]
 
-    def get_memory(self):
-        return self.prg_bytes
-
-    def get(self, position: int, size: int = 1):
-        initial_position = position - self.memory_start_location
-
-        if self.num_prg_blocks == 1:
-            initial_position %= 0x4000
-
-        return int.from_bytes(self.get_memory()[initial_position: initial_position + size], byteorder='little')
-
-    def get_bytes(self, position: int, size: int = 1):
-        initial_position = position - self.memory_start_location
-
-        if self.num_prg_blocks == 1:
-            initial_position %= 0x4000
-
-        return bytes(self.get_memory()[initial_position: initial_position + size])
-
-    def set(self, position: int, value: int, size):
+    def set(self, position: int, value: int, size: int = 1):
         raise Exception("Can't set read only memory")

@@ -114,7 +114,7 @@ class CPU:
                 self.pc_reg = int.from_bytes(self.bus.read_memory_bytes(0xFFFA, 2), byteorder='little')
 
             # get the current byte at pc
-            identifier_byte = bytes([self.bus.read_memory(self.pc_reg)])
+            identifier_byte = self.bus.read_memory_bytes(self.pc_reg)
 
             # turn the byte into an Instruction
             instruction: Instruction = self.instructions.get(identifier_byte)

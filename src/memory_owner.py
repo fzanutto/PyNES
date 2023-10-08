@@ -17,7 +17,7 @@ class MemoryOwner:
 
         value = self.get_memory()[initial_position: initial_position + size]
 
-        return value
+        return bytes(value)
 
     def set(self, position: int, value: int, size: int = 1):
         """

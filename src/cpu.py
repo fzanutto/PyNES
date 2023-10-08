@@ -32,11 +32,11 @@ class CPU:
         self.sp_reg: int = 0  # stack pointer
 
         # data registers: store a single byte
-        self.x_reg: int = 0  # x register
-        self.y_reg: int = 0  # y register
-        self.a_reg: int = 0  # a register
+        self.x_reg = 0
+        self.y_reg = 0
+        self.a_reg = 0
 
-        self.running: bool = True
+        self.running = True
 
         # create the instructions that the cpu can interpret
         instructions_list = self.find_instructions(Instruction)

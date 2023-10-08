@@ -165,10 +165,7 @@ class RelativeAddressing(Addressing):
         if offset > 127:
             offset = offset - 256
 
-        if (current_address & 0xFF) + offset > 0xFF:
-            cls.add_cycle_from_page_cross = 1
-        else:
-            cls.add_cycle_from_page_cross = 0
+        cls.add_cycle_from_page_cross = (current_address & 0xFF) + offset > 0xFF
 
         return current_address + offset
 
@@ -177,11 +174,7 @@ class IndirectBase(Addressing):
     @classmethod
     def get_address(cls, cpu: 'c.CPU', data_bytes):
         original_location = super().get_address(cpu, data_bytes)
-
-        lsb = cpu.bus.read_memory(original_location)
-        msb = cpu.bus.read_memory((original_location + 1) & 0xFF)
-
-        return (msb << 8) + lsb
+        return int.from_bytes(cpu.bus.read_memory_bytes(original_location, 2), byteorder='little')
 
 
 class IndirectAddressing(AbsoluteAddressing):
@@ -222,10 +215,7 @@ class IndirectIndexedAddressing(IndirectBase, ZeroPageAddressing):
         original_addr = super().get_address(cpu, data_bytes)
         offset = cpu.y_reg
 
-        if (original_addr & 0xFF) + offset > 0xFF:
-            cls.add_cycle_from_page_cross = 1
-        else:
-            cls.add_cycle_from_page_cross = 0
+        cls.add_cycle_from_page_cross = (original_addr & 0xFF) + offset > 0xFF
 
         value = original_addr + offset
         return value & 0xFFFF

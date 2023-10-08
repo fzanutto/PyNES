@@ -43,7 +43,7 @@ class Cli(ClearBit):
 
 class Bit(Instruction):
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.bus.read_memory(memory_address)
 
     @classmethod
@@ -51,10 +51,8 @@ class Bit(Instruction):
         and_result = cpu.a_reg & value
 
         cpu.status_reg.bits[Status.StatusTypes.zero] = not and_result
-        cpu.status_reg.bits[Status.StatusTypes.overflow] = (
-            value & (1 << 6)) > 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = (
-            value & (1 << 7)) > 0
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = value & (1 << 6)
+        cpu.status_reg.bits[Status.StatusTypes.negative] = value & (1 << 7)
 
 
 class BitZeroPage(ZeroPageAddressing, Bit):
@@ -69,7 +67,7 @@ class Brk(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x00])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return super().get_data(cpu, memory_address, data_bytes)
 
     @classmethod

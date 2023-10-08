@@ -1,4 +1,3 @@
-from typing import Optional
 from addressing import ImplicitAddressing, RelativeAddressing
 from instructions.generic_instructions import Instruction, WritesToMem
 
@@ -43,7 +42,7 @@ class Ld(Instruction):
     sets_negative_bit = True
     
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.bus.read_memory(memory_address)
 
 

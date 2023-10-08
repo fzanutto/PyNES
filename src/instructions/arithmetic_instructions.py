@@ -1,4 +1,3 @@
-from typing import Optional
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction, WritesToMem
 from status import Status
@@ -29,7 +28,7 @@ class Sbc(Instruction):
         return sub
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
         value = (~value) & 255
 
@@ -83,7 +82,7 @@ class Adc(Instruction):
     def write(cls, cpu, memory_address, value):
         cpu.a_reg = value
 
-    def add_carry(cpu, value):
+    def add_carry(cpu, value: int):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
@@ -151,7 +150,7 @@ class Iny(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return (cpu.y_reg + 1) & 0xFF
 
     @classmethod
@@ -166,7 +165,7 @@ class Dey(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return (cpu.y_reg - 1) & 0xFF
 
     @classmethod
@@ -181,7 +180,7 @@ class Inx(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return (cpu.x_reg + 1) & 0xFF
 
     @classmethod
@@ -196,7 +195,7 @@ class Dex(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return (cpu.x_reg - 1) & 0xFF
 
     @classmethod
@@ -209,7 +208,7 @@ class Inc(WritesToMem, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return (cpu.bus.read_memory(memory_address) + 1) & 0xFF
 
 
@@ -250,7 +249,7 @@ class Dec(WritesToMem, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
         return (value - 1) & 0xFF
 

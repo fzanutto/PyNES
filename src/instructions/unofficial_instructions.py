@@ -1,5 +1,3 @@
-
-
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX, ZeroPageAddressingWithY
 from instructions.arithmetic_instructions import Sbc
 from instructions.base_instructions import Ld
@@ -82,7 +80,7 @@ class Dcp(WritesToMem, Instruction):
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
-        return value - 1 if value > 0 else 255
+        return (value - 1) & 0xFF
 
 
 class DcpZeroPage(ZeroPageAddressing, Dcp):
@@ -166,14 +164,11 @@ class Isb(Instruction):
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = sub > 255
 
-        sub = sub % 256
+        sub &= 0xFF
 
         is_sum_positive = sub < 128
 
-        if is_first_number_positive == is_second_number_positive:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive != is_sum_positive
-        else:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = False
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive == is_second_number_positive and is_first_number_positive != is_sum_positive
 
         return sub
 
@@ -240,8 +235,7 @@ class Slo(Instruction):
 
     def asl(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
-        value = (value << 1) & 255
-        return value
+        return (value << 1) & 255
 
     @classmethod
     def get_data(cls, cpu, memory_address, data_bytes) -> int:
@@ -505,19 +499,15 @@ class Rra(Instruction):
         is_first_number_positive = cpu.a_reg < 128
         is_second_number_positive = value < 128
 
-        sum = cpu.a_reg + value + \
-            int(cpu.status_reg.bits[Status.StatusTypes.carry])
+        sum = cpu.a_reg + value + int(cpu.status_reg.bits[Status.StatusTypes.carry])
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = sum > 255
 
-        sum = sum % 256
+        sum &= 0xFF
 
         is_sum_positive = sum < 128
 
-        if is_first_number_positive == is_second_number_positive:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive != is_sum_positive
-        else:
-            cpu.status_reg.bits[Status.StatusTypes.overflow] = False
+        cpu.status_reg.bits[Status.StatusTypes.overflow] = is_first_number_positive == is_second_number_positive and is_first_number_positive != is_sum_positive
 
         return sum
 

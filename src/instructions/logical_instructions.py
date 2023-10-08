@@ -1,4 +1,3 @@
-from typing import Optional
 from addressing import AbsoluteAddressing, AbsoluteAddressingWithX, AbsoluteAddressingWithY, ImmediateReadAddressing, ImplicitAddressing, IndexedIndirectAddressing, IndirectIndexedAddressing, ZeroPageAddressing, ZeroPageAddressingWithX
 from instructions.generic_instructions import Instruction, WritesToMem
 from status import Status
@@ -13,7 +12,7 @@ class And(Instruction):
         cpu.a_reg = value
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         mem_value = cpu.bus.read_memory(memory_address)
 
         return mem_value & cpu.a_reg
@@ -64,7 +63,7 @@ class Cmp(Instruction):
         cpu.status_reg.bits[Status.StatusTypes.negative] = (diff & (1 << 7)) > 0
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.bus.read_memory(memory_address)
 
 
@@ -109,7 +108,7 @@ class Cpy(Instruction):
         cpu.status_reg.bits[Status.StatusTypes.negative] = (diff & (1 << 7)) > 0
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.bus.read_memory(memory_address)
 
 
@@ -131,11 +130,10 @@ class Cpx(Instruction):
         diff = cpu.x_reg - value
         cpu.status_reg.bits[Status.StatusTypes.carry] = diff >= 0
         cpu.status_reg.bits[Status.StatusTypes.zero] = diff == 0
-        cpu.status_reg.bits[Status.StatusTypes.negative] = (
-            diff & (1 << 7)) > 0
+        cpu.status_reg.bits[Status.StatusTypes.negative] = (diff & (1 << 7)) > 0
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.bus.read_memory(memory_address)
 
 
@@ -160,7 +158,7 @@ class Lsr(WritesToMem, Instruction):
         return value >> 1
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
         return cls.lsr(cpu, value)
 
@@ -169,7 +167,7 @@ class LsrImpl(ImplicitAddressing, Lsr):
     identifier_byte = bytes([0x4A])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return super().lsr(cpu, cpu.a_reg)
 
     @classmethod
@@ -215,10 +213,10 @@ class Asl(WritesToMem, Instruction):
 
     def asl(cpu, value):
         cpu.status_reg.bits[Status.StatusTypes.carry] = value & (1 << 7) > 0
-        return (value << 1) & 255
+        return (value << 1) & 0xFF
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
         return cls.asl(cpu, value)
 
@@ -227,7 +225,7 @@ class AslImpl(ImplicitAddressing, Asl):
     identifier_byte = bytes([0x0A])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.a_reg
         return super().asl(cpu, value)
 
@@ -273,7 +271,7 @@ class Ror(WritesToMem, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
 
         return cls.ror(cpu, value)
@@ -290,7 +288,7 @@ class RorImpl(ImplicitAddressing, Ror):
     identifier_byte = bytes([0x6A])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.a_reg
         return super().ror(cpu, value)
 
@@ -336,7 +334,7 @@ class Rol(WritesToMem, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.bus.read_memory(memory_address)
 
         return cls.rol(cpu, value)
@@ -346,14 +344,14 @@ class Rol(WritesToMem, Instruction):
 
         cpu.status_reg.bits[Status.StatusTypes.carry] = value >= (1 << 7)
 
-        return ((value << 1) | current_carry) & 255
+        return ((value << 1) | current_carry) & 0xFF
 
 
 class RolImp(ImplicitAddressing, Rol):
     identifier_byte = bytes([0x2A])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         value = cpu.a_reg
         return cls.rol(cpu, value)
 

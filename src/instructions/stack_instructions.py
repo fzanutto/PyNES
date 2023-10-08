@@ -1,6 +1,3 @@
-
-
-from typing import Optional
 from addressing import ImplicitAddressing
 from instructions.generic_instructions import Instruction
 
@@ -12,7 +9,7 @@ class Tax(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.a_reg
 
     @classmethod
@@ -27,7 +24,7 @@ class Tay(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.a_reg
 
     @classmethod
@@ -42,7 +39,7 @@ class Tsx(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.sp_reg
 
     @classmethod
@@ -57,7 +54,7 @@ class Txa(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.x_reg
 
     @classmethod
@@ -69,7 +66,7 @@ class Txs(ImplicitAddressing, Instruction):
     identifier_byte = bytes([0x9A])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.x_reg
 
     @classmethod
@@ -84,7 +81,7 @@ class Tya(ImplicitAddressing, Instruction):
     sets_negative_bit = True
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.y_reg
 
     @classmethod
@@ -102,7 +99,7 @@ class Php(ImplicitAddressing, PushToStack):
     identifier_byte = bytes([0x08])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.status_reg.to_int() | (1 << 5) | (1 << 4)
 
     @classmethod
@@ -114,7 +111,7 @@ class Pha(ImplicitAddressing, PushToStack):
     identifier_byte = bytes([0x48])
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.a_reg
 
     @classmethod
@@ -125,7 +122,7 @@ class Pha(ImplicitAddressing, PushToStack):
 class PullFromStack(Instruction):
 
     @classmethod
-    def get_data(cls, cpu, memory_address, data_bytes) -> Optional[int]:
+    def get_data(cls, cpu, memory_address, data_bytes) -> int:
         return cpu.pull_from_stack(1)
 
 
